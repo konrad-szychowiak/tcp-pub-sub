@@ -44,11 +44,11 @@ void handleConnection(int connection_socket_descriptor) {
   //TODO dynamiczne utworzenie instancji struktury thread_data_t o nazwie t_data (+ w odpowiednim miejscu zwolnienie pamięci)
   //TODO wypełnienie pól struktury
 
-  create_result = pthread_create(&thread1, NULL, ThreadBehavior, (void *)t_data);
-  if (create_result){
-    printf("Błąd przy próbie utworzenia wątku, kod błędu: %d\n", create_result);
-    exit(-1);
-  }
+//  create_result = pthread_create(&thread1, NULL, ThreadBehavior, (void *)t_data);
+//  if (create_result){
+//    printf("Błąd przy próbie utworzenia wątku, kod błędu: %d\n", create_result);
+//    exit(-1);
+//  }
 
   //TODO (przy zadaniu 1) odbieranie -> wyświetlanie albo klawiatura -> wysyłanie
 }
