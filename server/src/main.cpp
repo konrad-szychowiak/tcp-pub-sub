@@ -11,8 +11,9 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <iostream>
 
-#define SERVER_PORT 1234
+#define SERVER_PORT 8080
 #define QUEUE_SIZE 5
 
 //struktura zawierająca dane, które zostaną przekazane do wątku
@@ -37,8 +38,13 @@ void handleConnection(int connection_socket_descriptor) {
   //wynik funkcji tworzącej wątek
   int create_result = 0;
 
+  const char *answer = "Hello, world!";
+
+  write(connection_socket_descriptor, answer, strlen(answer));
+  std::cout << answer << std::endl;
+
   //uchwyt na wątek
-  pthread_t thread1;
+//  pthread_t thread1;
 
   //dane, które zostaną przekazane do wątku
   //TODO dynamiczne utworzenie instancji struktury thread_data_t o nazwie t_data (+ w odpowiednim miejscu zwolnienie pamięci)
@@ -51,6 +57,7 @@ void handleConnection(int connection_socket_descriptor) {
 //  }
 
   //TODO (przy zadaniu 1) odbieranie -> wyświetlanie albo klawiatura -> wysyłanie
+  return;
 }
 
 int main(int argc, char* argv[])
@@ -61,6 +68,8 @@ int main(int argc, char* argv[])
   int listen_result;
   char reuse_addr_val = 1;
   struct sockaddr_in server_address;
+
+  std::cout << "Server listening on port: " << SERVER_PORT << std::endl;
 
   //inicjalizacja gniazda serwera
 
