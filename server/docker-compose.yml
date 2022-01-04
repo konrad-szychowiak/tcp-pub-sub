@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  sk2server:
+    container_name: "sk2"
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "1234:8080"

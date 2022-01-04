@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-Wall)
 add_link_options(-pthread)
 
-add_executable(server src/main.cpp src/socket.cc src/socket.hh)
+add_executable(server src/main.cpp src/socket.cc src/socket.hh src/server.cc src/server.hh src/logger.cc src/logger.hh)

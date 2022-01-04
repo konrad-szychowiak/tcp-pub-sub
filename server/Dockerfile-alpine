@@ -1,0 +1,20 @@
+FROM alpine as builder
+
+RUN apk add gcc musl-dev libc-dev make
+RUN apk add -vv g++
+RUN apk add cmake
+
+WORKDIR /build/
+COPY src/ src
+COPY CMakeLists.txt .
+
+RUN cmake . && cmake --build .
+RUN ls -la
+
+FROM alpine as executor
+
+COPY --from=builder /build/server /usr/bin/sk2server
+
+RUN ls -la /usr/bin
+
+CMD ["sk2server"]
