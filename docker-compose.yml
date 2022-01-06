@@ -2,11 +2,17 @@ version: "3"
 
 services:
   sk2server:
-    container_name: "sk2"
+    container_name: "sk2-tcp-server"
 
     build:
-      context: .
+      context: server/
       dockerfile: Dockerfile
 
     ports:
       - "1234:8080"
+
+  sk2client:
+    container_name: "sk2-tcp-client"
+    build:
+      context: client/
+      dockerfile: Dockerfile
