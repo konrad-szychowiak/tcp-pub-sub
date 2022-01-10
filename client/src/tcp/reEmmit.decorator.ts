@@ -1,3 +1,4 @@
+// todo docs
 export function reEmmit(eventName: string, debug?: boolean) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     let originalMethod = descriptor.value;

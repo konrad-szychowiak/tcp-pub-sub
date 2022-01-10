@@ -3,44 +3,47 @@ import path from "path";
 import net from "net";
 import * as process from "process";
 import {setupWindow} from "./main/index";
-import {TcpMiddleware} from "./tcp";
 import {fromEvent} from "baconjs";
 import {Buffer} from "buffer";
+import {Store} from "./main/Store";
+import {TcpMiddleware} from "./tcp/TcpMiddleware";
+import {BrowserWindow} from 'electron';
 
 
-app.once('ready', () => {
-  console.log('App is ready');
-  const window = setupWindow()
+function setupActions(window: BrowserWindow): void {
 
-  const indexHTML = path.join(__dirname + '/renderer' + '/index.html');
-
-  /**
-   * Start listening to the events from Renderer
-   * once the window is ready
-   */
-  window.loadFile(indexHTML)
-    .then(() => {
     ipcMain.on('client-exit', (event, code?: number) => {
       app.exit(code)
     })
 
-    // ipcMain.on("toMain", (event, arg) => {
-    //   console.log(`connect with options: ${arg}`)
-    //   window.webContents.send("fromMain", 'hello');
-    // });
-
-
     ipcMain.on('tcp-connection-details', (event, payload: { host: string, port: number }) => {
       const client = new net.Socket();
-      const tcpMiddleware = new TcpMiddleware(window.webContents)
+      const appState =  new Store()
+      const tcpMiddleware = new TcpMiddleware(window.webContents, appState)
 
       const {host, port} = payload;
       console.log(`connect with options:`, payload)
 
+      ipcMain.on('app:create-conversation', (event, payload: { name: string }) => {
+        console.log(payload)
+        const {name} = payload
+        appState.addConversation(name)
+        tcpMiddleware.onListConversations()
+      })
+
+      ipcMain.on('app:delete-conversation', (event, payload: { id: number }) => {
+        console.log(payload)
+        const {id} = payload
+        appState.deleteConversationById(id)
+        tcpMiddleware.onListConversations()
+      })
+
       client.connect(port, host, async function () {
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         // todo
         tcpMiddleware.onConnect()
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        tcpMiddleware.onListConversations()
         console.log('CONNECTED TO: ' + host + ':' + port);
         // window.webContents.send('fromMain', `CONNECTED TO: ${host}:${port}`);
       });
@@ -63,6 +66,19 @@ app.once('ready', () => {
         console.log('Connection closed');
       });
     })
-  });
-});
+}
 
+
+app.once('ready', () => {
+  console.log('App is ready');
+  const window = setupWindow()
+
+  const indexHTML = path.join(__dirname + '/renderer' + '/index.html');
+
+  /**
+   * Start listening to the events from Renderer
+   * once the window is ready
+   */
+  window.loadFile(indexHTML)
+    .then(() => setupActions(window));
+});
