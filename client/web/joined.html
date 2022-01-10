@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html data-color-mode="dark" data-dark-theme="dark_dimmed"
+      lang="en">
+<head>
+    <title>Electron Project</title>
+    <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet"/>
+    <style>
+      .octicon {
+        display: inline-block;
+        vertical-align: text-top;
+        fill: currentColor;
+        overflow: visible;
+      }
+    </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bacon.js/2.0.9/Bacon.js"></script>
+</head>
+
+<body x-data>
+
+<header class="Header mb-5">
+    <code class="Header-item--full">
+        <span>host</span>:<span>port</span>
+    </code>
+
+
+    <div class="Header-item">
+        <button @click="() => $store.view.logOut()" class="btn" role="button">
+            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 010 1.5h-2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 010 1.5h-2.5A1.75 1.75 0 012 13.25V2.75zm10.44 4.5H6.75a.75.75 0 000 1.5h5.69l-1.97 1.97a.75.75 0 101.06 1.06l3.25-3.25a.75.75 0 000-1.06l-3.25-3.25a.75.75 0 10-1.06 1.06l1.97 1.97z"
+                      fill-rule="evenodd"></path>
+            </svg>
+            Log Out
+        </button>
+    </div>
+</header>
+
+<!-- connection details form -->
+<template x-if="$store.view.isLoggedOut()">
+    <div class="Box Box--spacious col-6 mx-auto text-center">
+        <div class="Box-body">
+            <h3 class="f1-light">
+                Connect
+            </h3>
+            <div class="form-group mb-4">
+                <div class="form-group-header"><label>Host</label></div>
+                <div class="form-group-body"><input class="form-control" type="text"/></div>
+            </div>
+            <div class="form-group mb-4">
+                <div class="form-group-header"><label>Port</label></div>
+                <div class="form-group-body"><input class="form-control" type="text"/></div>
+            </div>
+            <button class="btn btn-primary btn-block"
+            @click="() => $store.view.connecting()">
+                Submit
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- still connecting... -->
+<template x-if="$store.view.isConnecting()">
+    <div>
+        <div class="blankslate">
+            <h3><span>Loading</span><span class="AnimatedEllipsis"></span></h3>
+            <p>We are trying to connect to our server.</p>
+            <button class="btn btn-sm btn-link" @click="() => $store.view.connected()">faster!</button>
+        </div>
+    </div>
+</template>
+
+<!-- connected and ready -->
+<template x-if="$store.view.isConnected()">
+    <div class="container-xl">
+        <div class="clearfix gutter-md-spacious">
+
+            <aside class="col-4 float-left">
+                <div class="input-group" x-data="{ newConversationName: '' }">
+                    <input aria-label="Username" class="form-control input-block" placeholder="New conversation"
+                           type="text"
+                           x-model="newConversationName">
+                    <span class="input-group-button">
+                <button @click="() => { publishConversation(newConversationName); newConversationName = '' }"
+                        class="btn btn-primary">
+                    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path
+                            d="M14.064 0a8.75 8.75 0 00-6.187 2.563l-.459.458c-.314.314-.616.641-.904.979H3.31a1.75 1.75 0 00-1.49.833L.11 7.607a.75.75 0 00.418 1.11l3.102.954c.037.051.079.1.124.145l2.429 2.428c.046.046.094.088.145.125l.954 3.102a.75.75 0 001.11.418l2.774-1.707a1.75 1.75 0 00.833-1.49V9.485c.338-.288.665-.59.979-.904l.458-.459A8.75 8.75 0 0016 1.936V1.75A1.75 1.75 0 0014.25 0h-.186zM10.5 10.625c-.088.06-.177.118-.266.175l-2.35 1.521.548 1.783 1.949-1.2a.25.25 0 00.119-.213v-2.066zM3.678 8.116L5.2 5.766c.058-.09.117-.178.176-.266H3.309a.25.25 0 00-.213.119l-1.2 1.95 1.782.547zm5.26-4.493A7.25 7.25 0 0114.063 1.5h.186a.25.25 0 01.25.25v.186a7.25 7.25 0 01-2.123 5.127l-.459.458a15.21 15.21 0 01-2.499 2.02l-2.317 1.5-2.143-2.143 1.5-2.317a15.25 15.25 0 012.02-2.5l.458-.458h.002zM12 5a1 1 0 11-2 0 1 1 0 012 0zm-8.44 9.56a1.5 1.5 0 10-2.12-2.12c-.734.73-1.047 2.332-1.15 3.003a.23.23 0 00.265.265c.671-.103 2.273-.416 3.005-1.148z"
+                            fill-rule="evenodd"></path></svg>
+                    Publish
+                </button>
+                        </span>
+                </div>
+
+                <div class="Box Box--condensed mt-2">
+                    <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
+                        <h3 class="Box-title overflow-hidden flex-auto">
+                            Published
+                        </h3>
+                    </div>
+                    <template x-for="el in $store.authored.value">
+                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+                        <span>
+                            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                 xmlns="http://www.w3.org/2000/svg"><path
+                                    d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"
+                                    fill-rule="evenodd"></path></svg>
+                            <span class="Label Label--secondary ml-1 mr-1" x-text="el"></span>
+                            <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
+                        </span>
+
+                            <div class="BtnGroup d-block">
+                                <button @click="() => $store.activeConversation.set(el)"
+                                        class="BtnGroup-item btn btn-sm"
+                                        type="button">Open
+                                </button>
+                                <button @click="() => destroyPublished(el)" class="BtnGroup-item btn btn-danger btn-sm"
+                                        type="button">Destroy
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="Box Box--condensed mt-2">
+                    <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
+                        <h3 class="Box-title overflow-hidden flex-auto">
+                            Subscribed
+                        </h3>
+                    </div>
+
+                    <template x-for="el in $store.subscribed.get()">
+                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+                        <span>
+                            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                 xmlns="http://www.w3.org/2000/svg"><path
+                                    d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"
+                                    fill-rule="evenodd"></path></svg>
+                            <span class="Label Label--secondary ml-1 mr-1" x-text="el"></span>
+                            <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
+                        </span>
+
+                            <div class="BtnGroup d-block">
+                                <button @click="() => $store.activeConversation.set(el)"
+                                        class="BtnGroup-item btn btn-sm"
+                                        type="button">Open
+                                </button>
+                                <button @click="() => unsubscribe(el)" class="BtnGroup-item btn btn-danger btn-sm"
+                                        type="button">Unsubscribe
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="Box Box--condensed mt-2">
+                    <div class="Box-header d-flex flex-items-center">
+                        <h3 class="Box-title overflow-hidden flex-auto">
+                            Not Subscribed
+                        </h3>
+                    </div>
+
+                    <template x-for="el in $store.unsubscribed.get()">
+                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+                        <span>
+                            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                 xmlns="http://www.w3.org/2000/svg"><path
+                                    d="M.143 2.31a.75.75 0 011.047-.167l14.5 10.5a.75.75 0 11-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.832.88 9.577.43 8.9a1.618 1.618 0 010-1.797c.353-.533.995-1.42 1.868-2.305L.31 3.357A.75.75 0 01.143 2.31zm3.386 3.378a14.21 14.21 0 00-1.85 2.244.12.12 0 00-.022.068c0 .021.006.045.022.068.412.621 1.242 1.75 2.366 2.717C5.175 11.758 6.527 12.5 8 12.5c1.195 0 2.31-.488 3.29-1.191L9.063 9.695A2 2 0 016.058 7.52l-2.53-1.832zM8 3.5c-.516 0-1.017.09-1.499.251a.75.75 0 11-.473-1.423A6.23 6.23 0 018 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.619 1.619 0 010 1.798c-.11.166-.248.365-.41.587a.75.75 0 11-1.21-.887c.148-.201.272-.382.371-.53a.119.119 0 000-.137c-.412-.621-1.242-1.75-2.366-2.717C10.825 4.242 9.473 3.5 8 3.5z"
+                                    fill-rule="evenodd"></path></svg>
+                            <span class="Label Label--secondary ml-1 mr-1" x-text="el"></span>
+                            <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
+                        </span>
+
+                            <button @click="() => {subscribeTo(el);}" class="btn btn-sm "
+                                    type="button">
+                                Subscribe
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </aside>
+
+            <main class="col-8 float-left">
+                <template x-if="!$store.activeConversation.isActive()">
+                    <div class="blankslate">
+                        <h3 class="mb-1">Select a conversation</h3>
+                        <p>Here you will see the contents of a conversation if you subscribe to or publish one.</p>
+                    </div>
+                </template>
+
+                <template x-if="$store.activeConversation.isActive()">
+                    <div>
+                        <section class="Subhead">
+                            <div class="Subhead-heading" x-text="$store.activeConversation.conv.name"></div>
+                            <div class="Subhead-description">
+                                <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"
+                                          fill-rule="evenodd"></path>
+                                </svg>
+                                <span x-show="$store.activeConversation.conv.isPublisher">publisher</span><span
+                                    x-show="!$store.activeConversation.conv.isPublisher">subscriber</span>@<span>host</span>:<span>port</span>
+                            </div>
+                        </section>
+
+                        <!-- write message -->
+                        <section x-data="{message: ''}" x-show="$store.activeConversation.conv.isPublisher">
+                            <div class="form-group ">
+                                <div class="form-group-header"><label> Write a message</label></div>
+                                <!-- when acting as a publisher -->
+                                <div class="form-group-body d-flex flex-row ">
+                                    <input class="form-control input-block" type="text" x-model="message"/>
+                                    <button @click="() => {$store.activeConversation.postMessage(message); message = ''}"
+                                            class="btn btn-primary mr-2"
+                                            type="button">
+                                        <!-- <%= octicon "download" %> -->
+                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1.592 2.712L2.38 7.25h4.87a.75.75 0 110 1.5H2.38l-.788 4.538L13.929 8 1.592 2.712zM.989 8L.064 2.68a1.341 1.341 0 011.85-1.462l13.402 5.744a1.13 1.13 0 010 2.076L1.913 14.782a1.341 1.341 0 01-1.85-1.463L.99 8z"
+                                                  fill-rule="evenodd"></path>
+                                        </svg>
+                                        <span>Send</span>
+                                    </button>
+                                    <button @click="() => {message = ''}" class="btn btn-danger"
+                                            type="button">
+                                        <!-- <%= octicon "trashcan" %> -->
+                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"
+                                                  fill-rule="evenodd"></path>
+                                        </svg>
+                                        <span>Cancel</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- messages -->
+                        <section class="container-md p-2" id="messages"
+                                 x-show="($store.activeConversation.conv.msg.length > 0)">
+                            <template x-for="color in $store.activeConversation.conv.msg">
+                                <!-- message -->
+                                <div class="TimelineItem">
+                                    <div class="TimelineItem-badge color-bg-danger-emphasis color-fg-on-emphasis">
+                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                    d="M2.75 2.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 01.75.75v2.19l2.72-2.72a.75.75 0 01.53-.22h4.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25H2.75zM1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.457 1.457 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"
+                                                    fill-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="TimelineItem-body" x-text="color"></div>
+                                </div>
+                            </template>
+                            <div class="TimelineItem-break ml-0"></div>
+                        </section>
+                    </div>
+                </template>
+            </main>
+        </div>
+    </div>
+</template>
+
+<script>
+    let last_id = 0;
+    const conversationFactory = (name, msg, isPublisher = false) => ({id: last_id++, name, msg, isPublisher})
+
+    const initialConversations = [
+        conversationFactory('Hello', ['Hello!']),
+        conversationFactory('World', ['World!']),
+        conversationFactory('Ala ma kota', ['Ala...', '... ma...', '... kota!']),
+    ]
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('conversations', {
+            value: initialConversations,
+            get(_id) {
+                return this.value.filter(el => el.id === _id)[0];
+            },
+            remove(id) {
+                this.value = this.value.filter(el => el.id !== id)
+            },
+            postMessageIn(message, id) {
+                const modified = this.get(id);
+                this.remove(id)
+                modified.msg.push(message)
+                this.value.push(modified)
+            }
+        })
+        Alpine.store('subscribed', {
+            value: [],
+            get() {
+                return this.value
+            },
+            add(id) {
+                this.value.push(id);
+                return this.get();
+            },
+            remove(id) {
+                this.value = this.value.filter(el => el !== id);
+                return this.get();
+            }
+        })
+        Alpine.store('unsubscribed', {
+            value: initialConversations.map(el => el.id),
+            get() {
+                return this.value
+            },
+            add(id) {
+                this.value.push(id);
+                return this.get();
+            },
+            remove(id) {
+                this.value = this.value.filter(el => el !== id);
+                return this.get();
+            }
+        })
+        Alpine.store('authored', {
+            value: [],
+            get() {
+                return this.value
+            },
+            add(id) {
+                this.value.push(id);
+                return this.get();
+            },
+            remove(id) {
+                this.value = this.value.filter(el => el !== id);
+                return this.get();
+            }
+        })
+        Alpine.store('activeConversation', {
+            conv: undefined,
+            set(id) {
+                const foo = Alpine.store('conversations').get(id);
+                console.log(foo)
+                this.conv = foo;
+            },
+            getID() {
+                if (this.conv)
+                    return this.conv.id
+            },
+            getName() {
+                if (this.conv)
+                    return this.conv.name
+            },
+            unset() {
+                this.conv = undefined;
+            },
+            isActive() {
+                return this.conv !== undefined;
+            },
+            postMessage(text) {
+                Alpine.store('conversations').postMessageIn(text, this.getID())
+                this.set(this.getID())
+            }
+        })
+        Alpine.store('view', {
+            state: 'connected',
+            isConnecting() {
+                return this.state === 'connecting'
+            },
+            connecting() {
+                this.state = 'connecting'
+            },
+            isConnected() {
+                return this.state === 'connected'
+            },
+            connected() {
+                this.state = 'connected'
+            },
+            isLoggedOut() {
+                return this.state === 'logOut'
+            },
+            logOut() {
+                this.state = 'logOut'
+            },
+        })
+    })
+
+    function subscribeTo(conversationId) {
+        Alpine.store('unsubscribed').remove(conversationId)
+        Alpine.store('subscribed').add(conversationId)
+    }
+
+    function unsubscribe(conversationId) {
+        Alpine.store('subscribed').remove(conversationId)
+        Alpine.store('unsubscribed').add(conversationId)
+    }
+
+    function publishConversation(name) {
+        const newConversation = conversationFactory(name, [], true)
+        console.log(newConversation)
+        Alpine.store('conversations').value.push(newConversation)
+        Alpine.store('authored').add(newConversation.id)
+    }
+
+    function destroyPublished(id) {
+        Alpine.store('conversations').remove(id)
+        Alpine.store('authored').remove(id)
+        Alpine.store('activeConversation').unset()
+    }
+</script>
+</body>
+</html>

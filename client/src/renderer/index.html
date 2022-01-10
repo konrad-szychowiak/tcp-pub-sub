@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html data-color-mode="dark" data-dark-theme="dark"
+      lang="en">
+<head>
+    <title>Electron Project</title>
+    <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet"/>
+    <style>
+      .loader {
+        display: block;
+        position: relative;
+        height: 32px;
+        width: 100px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .loader:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 4px;
+        width: 24px;
+        height: 24px;
+        animation: ballbns 2s ease-in infinite;
+      }
+
+      @keyframes ballbns {
+        0% {
+          left: 0;
+          transform: translateX(-100%) rotate(0deg);
+          border-radius: 0;
+          background: #FFF;
+        }
+        100% {
+          left: 100%;
+          transform: translateX(0%) rotate(360deg);
+          border-radius: 50%;
+          background: #FFF;
+        }
+      }
+    </style>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="{
+    connecting: true,
+    connected: false,
+    host: 'localhost',
+    port: 8080
+}">
+<nav class="Header">
+    <div class="Header-item--full">
+        <ol>
+            <li class="breadcrumb-item">
+                                   connect
+            </li>
+            <li x-show="connected" class="breadcrumb-item">
+                menu
+            </li>
+        </ol>
+    </div>
+    <div class="Header-item">
+        <button class="btn btn-danger" @click="handleClientExit()" type="button">Exit</button>
+    </div>
+</nav>
+
+<div class="container-md" x-show="connecting">
+    <div class="form-group" x-data="{host: 'localhost', port: '8080'}">
+        <div class="form-group-header">
+            <label>Connection</label>
+        </div>
+        <div class="form-group-body">
+            <label for="host">Host</label>
+            <input class="form-control" id="host" type="text" value="localhost" x-model="host"/>
+        </div>
+
+        <div class="form-group-body">
+            <label for="port">Port</label>
+            <input class="form-control" id="port" type="text" x-model="port"/>
+        </div>
+
+        <button class="btn" id="connect"
+                @click="() => {handleConnect(); connected = true; connecting = false; }">
+            connect
+        </button> to <code x-text="host"></code>:<code x-text="port"></code>
+    </div>
+</div>
+
+<div class="container-md" id="server-res" x-show="connected">
+
+</div>
+
+<code id="more"></code>
+<script src="renderer.js" type="application/javascript"></script>
+</body>
+</html>

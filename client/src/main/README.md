@@ -1,0 +1,1 @@
+This code runs in the (electron's) main thread.

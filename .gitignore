@@ -3,3 +3,4 @@
 */cmake-*
 */node_modules/
 */*pnpm-lock.*
+*/build/
