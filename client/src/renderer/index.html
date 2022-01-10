@@ -12,6 +12,7 @@
         overflow: visible;
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bacon.js/2.0.9/Bacon.js"></script>
 </head>
@@ -189,7 +190,7 @@
                 <template x-if="$store.activeConversation.isActive()">
                     <div>
                         <section class="Subhead">
-                            <div class="Subhead-heading" x-text="$store.activeConversation.conv.name"></div>
+                            <div class="Subhead-heading" x-text="$store.activeConversation.name"></div>
                             <div class="Subhead-description">
                                 <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -235,8 +236,8 @@
 
                         <!-- messages -->
                         <section class="container-md p-2" id="messages"
-                                 x-show="($store.activeConversation.conv.msg.length > 0)">
-                            <template x-for="color in $store.activeConversation.conv.msg">
+                                 x-show="($store.activeConversation.messages.length > 0)">
+                            <template x-for="color in $store.activeConversation.messages">
                                 <!-- message -->
                                 <div class="TimelineItem">
                                     <div class="TimelineItem-badge color-bg-danger-emphasis color-fg-on-emphasis">

@@ -6,9 +6,36 @@
 // process.
 
 window.api.on("tcp-connected", (e, data) => {
-    Alpine.store('view').connected()
+    // todo
+    // is showed if and only if a list of conversations is loaded
+    // Alpine.store('view').connected()
     console.log(data)
 });
+
+window.api.on('app:list-conversations', (event, data) => {
+    console.warn({event, data})
+    Alpine.store('conversations').value = data
+    const availableIDs = data.map(el => el.id)
+
+    // update //
+    const unsubscribed = Alpine.store('unsubscribed').value
+    const subscribed = _.intersection(Alpine.store('subscribed').value, availableIDs)
+    const authored = _.intersection(Alpine.store('authored').value, availableIDs)
+
+    const subscribable = _.difference(availableIDs, _.union(authored, subscribed))
+
+    console.log({subscribable})
+    console.log({subscribed})
+    console.log({authored})
+
+    // save //
+    Alpine.store('unsubscribed').value = subscribable
+    Alpine.store('subscribed').value = subscribed
+    Alpine.store('authored').value = authored
+
+    // show //
+    Alpine.store('view').connected()
+})
 
 window.api.on('fm', (e, data) => {
     console.error('fm event is deprecated')
@@ -20,16 +47,14 @@ window.api.on("fromMain", (e, data) => {
     document.getElementById('more').innerText = data
 });
 
-function handleConnect()
-{
+function handleConnect() {
     const host = Alpine.store('host')
     const port = Alpine.store('port')
     Alpine.store('view').connecting()
-    window.api.send("tcp-connection-details", { host, port });
+    window.api.send("tcp-connection-details", {host, port});
 }
 
-function handleClientExit()
-{
+function handleClientExit() {
     window.api.exit()
 }
 
@@ -46,7 +71,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.store('host', 'localhost')
     Alpine.store('port', '8080')
     Alpine.store('conversations', {
-        value: initialConversations,
+        value: [],
         get(_id) {
             return this.value.filter(el => el.id === _id)[0];
         },
@@ -75,7 +100,7 @@ document.addEventListener('alpine:init', () => {
         }
     })
     Alpine.store('unsubscribed', {
-        value: initialConversations.map(el => el.id),
+        value: [],
         get() {
             return this.value
         },
@@ -113,9 +138,14 @@ document.addEventListener('alpine:init', () => {
             if (this.conv)
                 return this.conv.id
         },
-        getName() {
+        get name() {
             if (this.conv)
                 return this.conv.name
+        },
+        get messages () {
+            if (this.conv)
+                return this.conv.msg
+            return []
         },
         unset() {
             this.conv = undefined;
@@ -129,7 +159,7 @@ document.addEventListener('alpine:init', () => {
         }
     })
     Alpine.store('view', {
-        state: 'connected',
+        state: 'logOut',
         isConnecting() {
             return this.state === 'connecting'
         },
@@ -157,6 +187,7 @@ function subscribeTo(conversationId) {
 }
 
 function unsubscribe(conversationId) {
+    Alpine.store('activeConversation').unset()
     Alpine.store('subscribed').remove(conversationId)
     Alpine.store('unsubscribed').add(conversationId)
 }
@@ -166,10 +197,12 @@ function publishConversation(name) {
     console.log(newConversation)
     Alpine.store('conversations').value.push(newConversation)
     Alpine.store('authored').add(newConversation.id)
+    window.api.send("app:create-conversation", {name});
 }
 
 function destroyPublished(id) {
+    Alpine.store('activeConversation').unset()
     Alpine.store('conversations').remove(id)
     Alpine.store('authored').remove(id)
-    Alpine.store('activeConversation').unset()
+    window.api.send("app:delete-conversation", {id});
 }
