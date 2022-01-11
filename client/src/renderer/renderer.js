@@ -9,29 +9,38 @@ window.api.on("tcp-connected", (e, data) => {
     // todo
     // is showed if and only if a list of conversations is loaded
     // Alpine.store('view').connected()
-    console.log(data)
+    // console.log(data)
 });
 
+window.api.on('app:connection-error', (event, data) => {
+    console.error(data)
+    Alpine.store('error', data.toString())
+    // console.log(Alpine.store('error'))
+    Alpine.store('view').logOut()
+})
+
 window.api.on('app:list-conversations', (event, data) => {
-    console.warn({event, data})
+    // console.warn({event, data})
     Alpine.store('conversations').value = data
     const availableIDs = data.map(el => el.id)
 
     // update //
     const unsubscribed = Alpine.store('unsubscribed').value
     const subscribed = _.intersection(Alpine.store('subscribed').value, availableIDs)
-    const authored = _.intersection(Alpine.store('authored').value, availableIDs)
+    const authored = data.filter(el => el.isPublisher === true).map(el => el.id)
 
     const subscribable = _.difference(availableIDs, _.union(authored, subscribed))
 
-    console.log({subscribable})
-    console.log({subscribed})
-    console.log({authored})
+    // console.log({subscribable})
+    // console.log({subscribed})
+    // console.log({authored})
 
     // save //
     Alpine.store('unsubscribed').value = subscribable
     Alpine.store('subscribed').value = subscribed
     Alpine.store('authored').value = authored
+
+    console.log(Alpine.store('unsubscribed'), Alpine.store('subscribed'), Alpine.store('authored'))
 
     // show //
     Alpine.store('view').connected()
@@ -51,6 +60,7 @@ function handleConnect() {
     const host = Alpine.store('host')
     const port = Alpine.store('port')
     Alpine.store('view').connecting()
+    Alpine.store('error', '')
     window.api.send("tcp-connection-details", {host, port});
 }
 
@@ -58,18 +68,19 @@ function handleClientExit() {
     window.api.exit()
 }
 
-let last_id = 0;
-const conversationFactory = (name, msg, isPublisher = false) => ({id: last_id++, name, msg, isPublisher})
-
-const initialConversations = [
-    conversationFactory('Hello', ['Hello!']),
-    conversationFactory('World', ['World!']),
-    conversationFactory('Ala ma kota', ['Ala...', '... ma...', '... kota!']),
-]
+// let last_id = 0;
+// const conversationFactory = (name, msg, isPublisher = false) => ({id: last_id++, name, msg, isPublisher})
+//
+// const initialConversations = [
+//     conversationFactory('Hello', ['Hello!']),
+//     conversationFactory('World', ['World!']),
+//     conversationFactory('Ala ma kota', ['Ala...', '... ma...', '... kota!']),
+// ]
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('host', 'localhost')
     Alpine.store('port', '8080')
+    Alpine.store('error', '')
     Alpine.store('conversations', {
         value: [],
         get(_id) {
@@ -81,7 +92,7 @@ document.addEventListener('alpine:init', () => {
         postMessageIn(message, id) {
             const modified = this.get(id);
             this.remove(id)
-            modified.msg.push(message)
+            modified.messages.push(message)
             this.value.push(modified)
         }
     })
@@ -143,8 +154,9 @@ document.addEventListener('alpine:init', () => {
                 return this.conv.name
         },
         get messages () {
+            console.log(this.conv.messages)
             if (this.conv)
-                return this.conv.msg
+                return this.conv.messages
             return []
         },
         unset() {
@@ -181,6 +193,14 @@ document.addEventListener('alpine:init', () => {
     })
 })
 
+function readMessages(conversarionId)
+{
+    console.log('id', conversarionId)
+    const conversation = Alpine.store('conversations').get(conversarionId)
+    console.log('conversation', conversation)
+    Alpine.store('activeConversation').conv = conversation
+}
+
 function subscribeTo(conversationId) {
     Alpine.store('unsubscribed').remove(conversationId)
     Alpine.store('subscribed').add(conversationId)
@@ -193,10 +213,10 @@ function unsubscribe(conversationId) {
 }
 
 function publishConversation(name) {
-    const newConversation = conversationFactory(name, [], true)
-    console.log(newConversation)
-    Alpine.store('conversations').value.push(newConversation)
-    Alpine.store('authored').add(newConversation.id)
+    // const newConversation = conversationFactory(name, [], true)
+    // console.log(newConversation)
+    // Alpine.store('conversations').value.push(newConversation)
+    // Alpine.store('authored').add(newConversation.id)
     window.api.send("app:create-conversation", {name});
 }
 

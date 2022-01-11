@@ -37,6 +37,12 @@ export class TcpMiddleware {
     return this.conversations.conversations;
   }
 
+  @reEmmit('app:connection-error')
+  onConnectionError(error: Error)
+  {
+    return error
+  }
+
   // @reEmmit('pack:list')
   // static listConversations() {
   // }
