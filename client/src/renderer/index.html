@@ -2,85 +2,108 @@
 <html data-color-mode="dark" data-dark-theme="dark_dimmed"
       lang="en">
 <head>
-    <title>Electron Project</title>
-    <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet"/>
-    <style>
-      .octicon {
-        display: inline-block;
-        vertical-align: text-top;
-        fill: currentColor;
-        overflow: visible;
-      }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bacon.js/2.0.9/Bacon.js"></script>
+  <title>Electron Project</title>
+  <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet"/>
+  <style>
+    .octicon {
+      display: inline-block;
+      vertical-align: text-top;
+      fill: currentColor;
+      overflow: visible;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bacon.js/2.0.9/Bacon.js"></script>
 </head>
 
 <body x-data>
 
 <header class="Header mb-5">
-    <code class="Header-item--full">
-        <span x-text="$store.host"></span>:<span x-text="$store.port"></span>
-    </code>
+  <code class="Header-item--full">
+    <span x-text="$store.host"></span>:<span x-text="$store.port"></span>
+  </code>
 
 
-    <div class="Header-item">
-        <button @click="() => $store.view.logOut()" class="btn" role="button">
-            <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 010 1.5h-2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 010 1.5h-2.5A1.75 1.75 0 012 13.25V2.75zm10.44 4.5H6.75a.75.75 0 000 1.5h5.69l-1.97 1.97a.75.75 0 101.06 1.06l3.25-3.25a.75.75 0 000-1.06l-3.25-3.25a.75.75 0 10-1.06 1.06l1.97 1.97z"
-                      fill-rule="evenodd"></path>
-            </svg>
-            Log Out
-        </button>
-    </div>
+  <div class="Header-item">
+    <button @click="() => $store.view.logOut()" class="btn" role="button">
+      <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 010 1.5h-2.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 010 1.5h-2.5A1.75 1.75 0 012 13.25V2.75zm10.44 4.5H6.75a.75.75 0 000 1.5h5.69l-1.97 1.97a.75.75 0 101.06 1.06l3.25-3.25a.75.75 0 000-1.06l-3.25-3.25a.75.75 0 10-1.06 1.06l1.97 1.97z"
+              fill-rule="evenodd"></path>
+      </svg>
+      Log Out
+    </button>
+  </div>
 </header>
 
 <!-- connection details form -->
 <template x-if="$store.view.isLoggedOut()">
-    <div class="Box Box--spacious col-6 mx-auto text-center">
-        <div class="Box-body">
-            <h3 class="f1-light">
-                Connect
-            </h3>
-            <div class="form-group mb-4">
-                <div class="form-group-header"><label>Host</label></div>
-                <div class="form-group-body"><input class="form-control" type="text" x-model="$store.host"/></div>
-            </div>
-            <div class="form-group mb-4">
-                <div class="form-group-header"><label>Port</label></div>
-                <div class="form-group-body"><input class="form-control" type="text" x-model="$store.port"/></div>
-            </div>
-            <button class="btn btn-primary btn-block"
-                    @click="() => handleConnect()">
-                Submit
-            </button>
+  <section class="col-6 mx-auto">
+    <template x-if="$store.error">
+      <div class="flash mt-3 flash-error mb-3 d-flex flex-items-center">
+        <!--                <div class="p-5 border color-bg-subtle">image</div>-->
+        <!--                <p class="pl-4 m-0"><b>Body</b> Bacon ipsum dolor sit amet chuck prosciutto landjaeger ham hock filet-->
+        <!--                    mignon shoulder hamburger pig venison.</p>-->
+        <!-- <%= octicon "stop" %> -->
+        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.47.22A.75.75 0 015 0h6a.75.75 0 01.53.22l4.25 4.25c.141.14.22.331.22.53v6a.75.75 0 01-.22.53l-4.25 4.25A.75.75 0 0111 16H5a.75.75 0 01-.53-.22L.22 11.53A.75.75 0 010 11V5a.75.75 0 01.22-.53L4.47.22zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5H5.31zM8 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 018 4zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                fill-rule="evenodd"></path>
+        </svg>
+
+        <div>
+          We are unable to connect to the server. Please, check the connection details blow and try again.
+          <details class="details-reset">
+            <summary class="btn-link">More <span class="dropdown-caret"></span></summary>
+            <div><code x-text="$store.error"></code></div>
+          </details>
         </div>
+      </div>
+    </template>
+    <div class="Box Box--spacious text-center">
+      <div class="Box-body">
+        <h3 class="f1-light">
+          Connect
+        </h3>
+        <div class="form-group mb-4">
+          <div class="form-group-header"><label>Host</label></div>
+          <div class="form-group-body"><input class="form-control" type="text" x-model="$store.host"/></div>
+        </div>
+        <div class="form-group mb-4">
+          <div class="form-group-header"><label>Port</label></div>
+          <div class="form-group-body"><input class="form-control" type="text" x-model="$store.port"/></div>
+        </div>
+        <button @click="() => handleConnect()"
+                class="btn btn-primary btn-block">
+          Submit
+        </button>
+      </div>
     </div>
+
+  </section>
 </template>
 
 <!-- still connecting... -->
 <template x-if="$store.view.isConnecting()">
-    <div>
-        <div class="blankslate">
-            <h3><span>Loading</span><span class="AnimatedEllipsis"></span></h3>
-            <p>We are trying to connect to our server.</p>
-            <button class="btn btn-sm btn-link" @click="() => $store.view.connected()">faster!</button>
-        </div>
+  <div>
+    <div class="blankslate">
+      <h3><span>Loading</span><span class="AnimatedEllipsis"></span></h3>
+      <p>We are trying to connect to our server.</p>
+      <button @click="() => $store.view.connected()" class="btn btn-sm btn-link">faster!</button>
     </div>
+  </div>
 </template>
 
 <!-- connected and ready -->
 <template x-if="$store.view.isConnected()">
-    <div class="container-xl">
-        <div class="clearfix gutter-md-spacious">
+  <div class="container-xl">
+    <div class="clearfix gutter-md-spacious">
 
-            <aside class="col-4 float-left">
-                <div class="input-group" x-data="{ newConversationName: '' }">
-                    <input aria-label="Username" class="form-control input-block" placeholder="New conversation"
-                           type="text"
-                           x-model="newConversationName">
-                    <span class="input-group-button">
+      <aside class="col-4 float-left">
+        <div class="input-group" x-data="{ newConversationName: '' }">
+          <input aria-label="Username" class="form-control input-block" placeholder="New conversation"
+                 type="text"
+                 x-model="newConversationName">
+          <span class="input-group-button">
                 <button @click="() => { publishConversation(newConversationName); newConversationName = '' }"
                         class="btn btn-primary">
                     <svg class="octicon" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path
@@ -89,16 +112,16 @@
                     Publish
                 </button>
                         </span>
-                </div>
+        </div>
 
-                <div class="Box Box--condensed mt-2">
-                    <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
-                        <h3 class="Box-title overflow-hidden flex-auto">
-                            Published
-                        </h3>
-                    </div>
-                    <template x-for="el in $store.authored.value">
-                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+        <div class="Box Box--condensed mt-2">
+          <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
+            <h3 class="Box-title overflow-hidden flex-auto">
+              Published
+            </h3>
+          </div>
+          <template x-for="el in $store.authored.value">
+            <div class="Box-body d-flex flex-items-center flex-justify-between">
                         <span>
                             <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
                                  xmlns="http://www.w3.org/2000/svg"><path
@@ -108,28 +131,28 @@
                             <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
                         </span>
 
-                            <div class="BtnGroup d-block">
-                                <button @click="() => $store.activeConversation.set(el)"
-                                        class="BtnGroup-item btn btn-sm"
-                                        type="button">Open
-                                </button>
-                                <button @click="() => destroyPublished(el)" class="BtnGroup-item btn btn-danger btn-sm"
-                                        type="button">Destroy
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
+              <div class="BtnGroup d-block">
+                <button @click="() => readMessages(el)"
+                        class="BtnGroup-item btn btn-sm"
+                        type="button">Open
+                </button>
+                <button @click="() => destroyPublished(el)" class="BtnGroup-item btn btn-danger btn-sm"
+                        type="button">Destroy
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
 
-                <div class="Box Box--condensed mt-2">
-                    <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
-                        <h3 class="Box-title overflow-hidden flex-auto">
-                            Subscribed
-                        </h3>
-                    </div>
+        <div class="Box Box--condensed mt-2">
+          <div class="Box-header d-flex flex-items-center" x-data="{ newConversationName: '' }">
+            <h3 class="Box-title overflow-hidden flex-auto">
+              Subscribed
+            </h3>
+          </div>
 
-                    <template x-for="el in $store.subscribed.get()">
-                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+          <template x-for="el in $store.subscribed.get()">
+            <div class="Box-body d-flex flex-items-center flex-justify-between">
                         <span>
                             <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
                                  xmlns="http://www.w3.org/2000/svg"><path
@@ -139,28 +162,28 @@
                             <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
                         </span>
 
-                            <div class="BtnGroup d-block">
-                                <button @click="() => $store.activeConversation.set(el)"
-                                        class="BtnGroup-item btn btn-sm"
-                                        type="button">Open
-                                </button>
-                                <button @click="() => unsubscribe(el)" class="BtnGroup-item btn btn-danger btn-sm"
-                                        type="button">Unsubscribe
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
+              <div class="BtnGroup d-block">
+                <button @click="() => $store.activeConversation.set(el)"
+                        class="BtnGroup-item btn btn-sm"
+                        type="button">Open
+                </button>
+                <button @click="() => unsubscribe(el)" class="BtnGroup-item btn btn-danger btn-sm"
+                        type="button">Unsubscribe
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
 
-                <div class="Box Box--condensed mt-2">
-                    <div class="Box-header d-flex flex-items-center">
-                        <h3 class="Box-title overflow-hidden flex-auto">
-                            Not Subscribed
-                        </h3>
-                    </div>
+        <div class="Box Box--condensed mt-2">
+          <div class="Box-header d-flex flex-items-center">
+            <h3 class="Box-title overflow-hidden flex-auto">
+              Not Subscribed
+            </h3>
+          </div>
 
-                    <template x-for="el in $store.unsubscribed.get()">
-                        <div class="Box-body d-flex flex-items-center flex-justify-between">
+          <template x-for="el in $store.unsubscribed.get()">
+            <div class="Box-body d-flex flex-items-center flex-justify-between">
                         <span>
                             <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
                                  xmlns="http://www.w3.org/2000/svg"><path
@@ -170,94 +193,94 @@
                             <span class="text-emphasized" x-text="$store.conversations.get(el).name"></span>
                         </span>
 
-                            <button @click="() => {subscribeTo(el);}" class="btn btn-sm "
-                                    type="button">
-                                Subscribe
-                            </button>
-                        </div>
-                    </template>
-                </div>
-            </aside>
-
-            <main class="col-8 float-left">
-                <template x-if="!$store.activeConversation.isActive()">
-                    <div class="blankslate">
-                        <h3 class="mb-1">Select a conversation</h3>
-                        <p>Here you will see the contents of a conversation if you subscribe to or publish one.</p>
-                    </div>
-                </template>
-
-                <template x-if="$store.activeConversation.isActive()">
-                    <div>
-                        <section class="Subhead">
-                            <div class="Subhead-heading" x-text="$store.activeConversation.name"></div>
-                            <div class="Subhead-description">
-                                <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"
-                                          fill-rule="evenodd"></path>
-                                </svg>
-                                <span x-show="$store.activeConversation.conv.isPublisher">publisher</span><span
-                                    x-show="!$store.activeConversation.conv.isPublisher">subscriber</span>@<span>host</span>:<span>port</span>
-                            </div>
-                        </section>
-
-                        <!-- write message -->
-                        <section x-data="{message: ''}" x-show="$store.activeConversation.conv.isPublisher">
-                            <div class="form-group ">
-                                <div class="form-group-header"><label> Write a message</label></div>
-                                <!-- when acting as a publisher -->
-                                <div class="form-group-body d-flex flex-row ">
-                                    <input class="form-control input-block" type="text" x-model="message"/>
-                                    <button @click="() => {$store.activeConversation.postMessage(message); message = ''}"
-                                            class="btn btn-primary mr-2"
-                                            type="button">
-                                        <!-- <%= octicon "download" %> -->
-                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1.592 2.712L2.38 7.25h4.87a.75.75 0 110 1.5H2.38l-.788 4.538L13.929 8 1.592 2.712zM.989 8L.064 2.68a1.341 1.341 0 011.85-1.462l13.402 5.744a1.13 1.13 0 010 2.076L1.913 14.782a1.341 1.341 0 01-1.85-1.463L.99 8z"
-                                                  fill-rule="evenodd"></path>
-                                        </svg>
-                                        <span>Send</span>
-                                    </button>
-                                    <button @click="() => {message = ''}" class="btn btn-danger"
-                                            type="button">
-                                        <!-- <%= octicon "trashcan" %> -->
-                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"
-                                                  fill-rule="evenodd"></path>
-                                        </svg>
-                                        <span>Cancel</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- messages -->
-                        <section class="container-md p-2" id="messages"
-                                 x-show="($store.activeConversation.messages.length > 0)">
-                            <template x-for="color in $store.activeConversation.messages">
-                                <!-- message -->
-                                <div class="TimelineItem">
-                                    <div class="TimelineItem-badge color-bg-danger-emphasis color-fg-on-emphasis">
-                                        <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                    d="M2.75 2.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 01.75.75v2.19l2.72-2.72a.75.75 0 01.53-.22h4.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25H2.75zM1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.457 1.457 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"
-                                                    fill-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="TimelineItem-body" x-text="color"></div>
-                                </div>
-                            </template>
-                            <div class="TimelineItem-break ml-0"></div>
-                        </section>
-                    </div>
-                </template>
-            </main>
+              <button @click="() => {subscribeTo(el);}" class="btn btn-sm "
+                      type="button">
+                Subscribe
+              </button>
+            </div>
+          </template>
         </div>
+      </aside>
+
+      <main class="col-8 float-left">
+        <template x-if="!$store.activeConversation.isActive()">
+          <div class="blankslate">
+            <h3 class="mb-1">Select a conversation</h3>
+            <p>Here you will see the contents of a conversation if you subscribe to or publish one.</p>
+          </div>
+        </template>
+
+        <template x-if="$store.activeConversation.isActive()">
+          <div>
+            <section class="Subhead">
+              <div class="Subhead-heading" x-text="$store.activeConversation.name"></div>
+              <div class="Subhead-description">
+                <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.004 6.004 0 00-3.431 5.142.75.75 0 001.498.07 4.5 4.5 0 018.99 0 .75.75 0 101.498-.07 6.005 6.005 0 00-3.432-5.142z"
+                        fill-rule="evenodd"></path>
+                </svg>
+                <span x-show="$store.activeConversation.conv.isPublisher">publisher</span><span
+                      x-show="!$store.activeConversation.conv.isPublisher">subscriber</span>@<span>host</span>:<span>port</span>
+              </div>
+            </section>
+
+            <!-- write message -->
+            <section x-data="{message: ''}" x-show="$store.activeConversation.conv.isPublisher">
+              <div class="form-group ">
+                <div class="form-group-header"><label> Write a message</label></div>
+                <!-- when acting as a publisher -->
+                <div class="form-group-body d-flex flex-row ">
+                  <input class="form-control input-block" type="text" x-model="message"/>
+                  <button @click="() => {$store.activeConversation.postMessage(message); message = ''}"
+                          class="btn btn-primary mr-2"
+                          type="button">
+                    <!-- <%= octicon "download" %> -->
+                    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                         xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1.592 2.712L2.38 7.25h4.87a.75.75 0 110 1.5H2.38l-.788 4.538L13.929 8 1.592 2.712zM.989 8L.064 2.68a1.341 1.341 0 011.85-1.462l13.402 5.744a1.13 1.13 0 010 2.076L1.913 14.782a1.341 1.341 0 01-1.85-1.463L.99 8z"
+                            fill-rule="evenodd"></path>
+                    </svg>
+                    <span>Send</span>
+                  </button>
+                  <button @click="() => {message = ''}" class="btn btn-danger"
+                          type="button">
+                    <!-- <%= octicon "trashcan" %> -->
+                    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                         xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"
+                            fill-rule="evenodd"></path>
+                    </svg>
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- messages -->
+            <section class="container-md p-2" id="messages"
+                     x-show="($store.activeConversation.messages.length > 0)">
+              <template x-for="color in $store.activeConversation.messages">
+                <!-- message -->
+                <div class="TimelineItem">
+                  <div class="TimelineItem-badge color-bg-danger-emphasis color-fg-on-emphasis">
+                    <svg class="octicon" height="16" viewBox="0 0 16 16" width="16"
+                         xmlns="http://www.w3.org/2000/svg">
+                      <path
+                              d="M2.75 2.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 01.75.75v2.19l2.72-2.72a.75.75 0 01.53-.22h4.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25H2.75zM1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.457 1.457 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"
+                              fill-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                  <div class="TimelineItem-body" x-text="color"></div>
+                </div>
+              </template>
+              <div class="TimelineItem-break ml-0"></div>
+            </section>
+          </div>
+        </template>
+      </main>
     </div>
+  </div>
 </template>
 
 <script src="renderer.js" type="application/javascript"></script>
