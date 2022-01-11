@@ -15,7 +15,7 @@ export class Store {
   ]
 
   // fixme: mock
-  addConversation(name: string)
+  createConversation(name: string)
   {
     this.conversations.push(new Conversation(this.last_id++, name, [], true))
   }

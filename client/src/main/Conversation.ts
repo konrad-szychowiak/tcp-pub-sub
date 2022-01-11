@@ -13,6 +13,13 @@ export class Conversation {
     this.id = id;
     this.name = name;
     this.isPublisher = isPublisher;
-    this.messages = []
+    // this.messages = []
+    // fixme
+    this.messages = msg
+  }
+
+  postMessage(text: string)
+  {
+    this.messages.push(text)
   }
 }
