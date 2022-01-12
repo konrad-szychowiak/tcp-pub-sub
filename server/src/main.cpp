@@ -6,6 +6,8 @@
 #include "abstract/Notifier.h"
 #include "abstract/Listener.h"
 #include "ConversationsManager.h"
+#include "listeners/ConversationsListener.h"
+#include "ConnectionHandler.h"
 
 #define SERVER_PORT 8080
 #define QUEUE_SIZE 5
@@ -26,12 +28,7 @@ struct thread_data_t
  */
 void *ThreadBehavior(void *t_data);
 
-/**
- * Funkcja obsługująca połączenie z nowym klientem.
- * @param connection_socket_descriptor
- * @returns 0 if continue, error code otherwise
- */
-int handleConnection(int connection_socket_descriptor);
+int connectionHandlerFactory(int connection_socket_descriptor);
 
 ConversationsManager state;
 //Notifier no = Notifier();
@@ -44,7 +41,7 @@ int main(int argc, char *argv[])
   auto logger = new Logger(argv[0]);
   auto server = new Server(SERVER_PORT, QUEUE_SIZE, logger);
 
-  while (server->connection(handleConnection))
+  while (server->connection(connectionHandlerFactory))
   {}
 
   delete server;
@@ -58,31 +55,57 @@ void *ThreadBehavior(void *t_data)
 {
   pthread_detach(pthread_self());
   struct thread_data_t *th_data = (struct thread_data_t *) t_data;
-  //dostęp do pól struktury: (*th_data).pole
-  //TODO (przy zadaniu 1) klawiatura -> wysyłanie albo odbieranie -> wyświetlanie
 
   auto sd = (*th_data).connection_socket_descriptor;
 
-  /**
-   * Create listener
-   */
-  auto l = new Listener();
-
+  // before read //
   cout << "[log] socket descriptor is {" << sd << "}\n";
 
-  const char *answer = "Hello, world!";
-  write(sd, answer, strlen(answer));
-//  std::cout << answer << std::endl;
-  state.addListener(l);
-  l->write();
-  state.removeListener(l);
+  /**
+   * Create listener that awaits updates about the list of conversations
+   */
+  auto conversationsListener = new ConversationsListener(sd);
 
-  delete l;
+  const char *answer = "Hello, world!\n";
+  write(sd, answer, strlen(answer)+1);
+
+  // FIXME access via mutex
+  state.addListener(conversationsListener);
+  sleep(5);
+  state.notifyAll();
+
+  // read
+  char packSymbol;
+
+  while(read(sd, &packSymbol, sizeof(char)) > 0)
+  {
+    cout << "[thread:" << sd << "] received: " << packSymbol << endl;
+    switch (condition)
+    {
+      
+    }
+    state.addConversation()
+  }
+
+  cout << "[thread:" << sd << "] connection closed\n";
+
+  // cleanup //
+
+  state.removeListener(conversationsListener);
+  delete conversationsListener;
+  delete th_data;
+
+  close(sd);
 
   pthread_exit(NULL);
 }
 
-int handleConnection(int connection_socket_descriptor)
+/**
+ * Funkcja obsługująca połączenie z nowym klientem.
+ * @param connection_socket_descriptor
+ * @returns 0 if continue, error code otherwise
+ */
+int connectionHandlerFactory(int connection_socket_descriptor)
 {
   // uchwyt na wątek
   pthread_t connectionThread;
@@ -106,9 +129,10 @@ int handleConnection(int connection_socket_descriptor)
 
   //TODO (przy zadaniu 1) odbieranie -> wyświetlanie albo klawiatura -> wysyłanie
 
-  pthread_join(connectionThread, NULL);
+//  pthread_join(connectionThread, NULL);
 
-  delete t_data;
+//
+
 
   return 1;
 }

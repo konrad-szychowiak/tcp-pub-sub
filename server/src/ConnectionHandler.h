@@ -7,10 +7,19 @@ using namespace std;
 
 class ConnectionHandler
 {
-    int connectionSocket;
-    map<int, Listener> createdListeners;
-    deque <int> createdConversations;
+  int connectionSocket;
+  map<int, Listener> createdListeners;
+  deque<int> createdConversations;
 
-    void closeConnection();
-    void read();
+public:
+  /**
+   *
+   * @param socket  socket descriptor of the socket created for the connection handled by this instance
+   */
+  ConnectionHandler(int socket) : connectionSocket(socket)
+  {}
+
+  void closeConnection();
+
+  void read();
 };

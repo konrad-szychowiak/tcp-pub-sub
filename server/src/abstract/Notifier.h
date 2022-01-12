@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class Notifier
+class Notifier : public Observable
 {
   vector<Listener*> listeners;
 
@@ -16,8 +16,10 @@ public:
 
   void
   removeListener(Listener *listener);
-//
-//  void
-//  notifyAll();
+
+  void
+  notifyAll();
+
+  void updateOne(Listener*listener);
 };
 

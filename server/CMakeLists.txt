@@ -11,7 +11,7 @@ add_executable(server src/main.cpp
         src/socket.cc
         src/server.cc
         src/logger.cc
-                src/ConversationsListener.cpp
+        src/listeners/ConversationsListener.cpp
                 src/ConversationsManager.cpp
                 src/Conversation.cpp
                 src/Message.cpp
@@ -34,4 +34,4 @@ add_executable(server src/main.cpp
 #        src/abstract/Visitor.h
 
 
-        )
+        src/abstract/Observable.cc src/abstract/Observable.hh)

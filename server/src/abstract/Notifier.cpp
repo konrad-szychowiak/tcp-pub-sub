@@ -9,13 +9,18 @@ void Notifier::removeListener(Listener *listener)
 {
   auto iterator = find(listeners.begin(), listeners.end(), listener);
   listeners.erase(iterator);
-  cout << listeners.size() << "\n";
 }
 
-//void Notifier::notifyAll()
-//{
-//  for ( auto listener : listeners )
-//  {
-//    listener->update(this);
-//  }
-//}
+void Notifier::notifyAll()
+{
+  for ( auto listener : listeners )
+  {
+    listener->update(this);
+  }
+}
+
+void Notifier::updateOne(Listener *listener)
+{
+  listener->update(this);
+}
+
