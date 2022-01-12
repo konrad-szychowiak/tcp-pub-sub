@@ -27,25 +27,16 @@ public:
     {
       message += "\t" + to_string(p.first);
       message += "\t" + (*p.second).name;
-//      cout << message << endl;
+      message += "\t" + (*p.second).uuid;
     }
     send();
   }
-
-//  void
-//  update(ConversationsManager *manager)
-//  {
-//    cout << "updating from conversation manager\n";
-
-//    send();
-//  }
-
 
   void
   send()
   override
   {
-    Listener::send();
+//    Listener::send();
     message = 'L' + message + ";";
     const char *answer = message.c_str();
     cout << answer << endl;

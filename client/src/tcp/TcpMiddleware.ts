@@ -2,6 +2,7 @@ import {Store} from "../main/Store";
 import {WebContents} from "electron";
 import {reEmmit} from "./reEmmit.decorator";
 import Buffer from "buffer";
+import {Conversation} from "../main/Conversation";
 
 export class TcpMiddleware {
   private wc: Electron.WebContents;
@@ -26,14 +27,39 @@ export class TcpMiddleware {
     return 'Connected to the server'
   }
 
-  @reEmmit('tcp:data')
   onData(data: Buffer) {
-    return data.toString()
+    const text = data.toString();
+    text.replace(/\x00/g, '').split(';').filter(el => el && el.length > 0).forEach(message => {
+      const [symbol,...args] = message.split('\t');
+      // console.log(symbol, '->', args)
+      switch (symbol) {
+        case 'L': this.listConversations(args); break;
+        case 'N': this.newMessage(parseInt(args[0]), args[1]); break;
+        default: this.onGenericData(text);
+      }
+    })
+    return text;
   }
 
-  // fixme: i'm a mock
+  @reEmmit('tcp:data')
+  onGenericData(text: string) {
+    return text;
+  }
+
   @reEmmit('app:list-conversations')
-  onListConversations() {
+  listConversations(args: string[]) {
+    this.conversations.resetConversations();
+    for (let i = 0; i < args.length; i++)
+    {
+      this.conversations.addConversation(new Conversation(parseInt(args[i]), args[++i], args[++i], []))
+    }
+    return this.conversations.conversations;
+  }
+
+  @reEmmit('app:list-conversations')
+  // @reEmmit('app:new-msg')
+  newMessage(id: number, text: string) {
+    this.conversations.conversations.filter(el => el.id === id)[0].postMessage(text);
     return this.conversations.conversations;
   }
 
@@ -43,14 +69,8 @@ export class TcpMiddleware {
     return error
   }
 
-  // @reEmmit('pack:list')
-  // static listConversations() {
-  // }
-  //
-  // @reEmmit('pack:new')
-  // static newMessage() {
-  // }
-  //
+
+
   // static subscribeToConversation() {
   // }
   //

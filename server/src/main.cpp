@@ -8,8 +8,9 @@
 #include "ConversationsManager.h"
 #include "listeners/ConversationsListener.h"
 #include "ConnectionHandler.h"
+#include "listeners/MessagesListener.h"
 
-#define SERVER_PORT 8080
+#define SERVER_PORT 1234
 #define QUEUE_SIZE 5
 
 /**
@@ -105,23 +106,56 @@ void *ThreadBehavior(void *t_data)
       {
         case 'C': // create a new conversation // and subscribe to it?
         {
-          cout << "creating a new conversation \n";
-          auto myNewConversation = new Conversation("/* todo: conversation should have a name */");
+          string withoutSymbol = fullMessage.substr(2);
+          int dividerPosition = withoutSymbol.find('\t');
+          string name = withoutSymbol.substr(0, dividerPosition);
+          string uuid = withoutSymbol.substr(dividerPosition+1);
+          cout << "creating a new conversation :: " << name << " :: " << uuid << endl;
+          auto myNewConversation = new Conversation(name, uuid);
+
           state.addConversation(myNewConversation);
           state.notifyAll();
+
+          auto createdConversationListener = new MessagesListener(sd);
+          state.getConversationById(myNewConversation->id)->addListener(createdConversationListener);
+
           break;
         }
         case 'D': // delete an existing conversation
         {
           string strID = fullMessage.substr(2);
+          int id = atoi(strID.c_str());
           cout << "deleting an old conversation: " << strID << " \n";
-//          auto myOldConversation = state.getConversationById()
+          state.removeConversationById(id);
+          state.notifyAll();
+
           break;
         }
         case 'S': // Subscribe to an existing conversation
         {
+          string strID = fullMessage.substr(2);
+          int id = atoi(strID.c_str());
           // fixme
-          cerr << "[unimplemented] subscribe to a conversation -> " << fullMessage << endl;
+          cerr << "[unimplemented] subscribe to a conversation: " << id << endl;
+
+          auto subscribedConversationListener = new MessagesListener(sd);
+          state.getConversationById(id)->addListener(subscribedConversationListener);
+
+          break;
+        }
+        case 'P': // post (new) message <id> <content>
+        {
+          string withoutSymbol = fullMessage.substr(2);
+          int dividerPosition = withoutSymbol.find('\t');
+          string strID = withoutSymbol.substr(0, dividerPosition);
+          int id = atoi(strID.c_str());
+          string content = withoutSymbol.substr(dividerPosition+1);
+          cout << "post a msg in :: " << strID << " :with content: " << content << endl;
+
+          auto targetConversation = state.getConversationById(id);
+          targetConversation->add(new Message(0,"a", content));
+          targetConversation->notifyAll();
+
           break;
         }
         default:

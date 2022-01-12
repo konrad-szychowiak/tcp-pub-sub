@@ -7,6 +7,7 @@ import {fromEvent} from "baconjs";
 import {Buffer} from "buffer";
 import {Store} from "./main/Store";
 import {TcpMiddleware} from "./tcp/TcpMiddleware";
+import crypto from "crypto";
 
 
 function setupActions(window: BrowserWindow): void {
@@ -36,17 +37,22 @@ function setupActions(window: BrowserWindow): void {
     ipcMain.on('app:create-conversation', (event, payload: { name: string }) => {
       console.log(payload)
       const {name} = payload
-      appState.createConversation(name)
-      tcpMiddleware.onListConversations()
+      const {uuid} = appState.createConversation(name)
+      // tcpMiddleware.onListConversations()
       // todo
-      client.write(`C\t${name};`);
+      client.write(`C\t${name}\t${uuid};`);
+    });
+
+    ipcMain.on('app:post-msg', (event, payload: { id: number, text: string }) => {
+      const {id, text} = payload
+      client.write(`P\t${id}\t${text};`);
     });
 
     ipcMain.on('app:delete-conversation', (event, payload: { id: number }) => {
       console.log(payload)
       const {id} = payload
       appState.deleteConversationById(id)
-      tcpMiddleware.onListConversations()
+      // tcpMiddleware.onListConversations()
       // todo
       client.write(`D\t${id};`)
     });
@@ -58,7 +64,7 @@ function setupActions(window: BrowserWindow): void {
       // todo
       tcpMiddleware.onConnect()
       await new Promise(resolve => setTimeout(resolve, 1000));
-      tcpMiddleware.onListConversations()
+      // tcpMiddleware.onListConversations()
       console.log('CONNECTED TO: ' + host + ':' + port);
       // window.webContents.send('fromMain', `CONNECTED TO: ${host}:${port}`);
     })

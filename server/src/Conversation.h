@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <time.h>
@@ -15,12 +16,20 @@ using namespace std;
 class Conversation : public Notifier, Visitable
 {
 public:
-    deque <Message> base_of_messages;
-    string name;
-    int id = -1;
+  Message *last_message = nullptr;
+  string name;
+  string uuid;
+  int id = -1;
 
-    explicit Conversation(string name) : name(std::move(name)) {}
+  Conversation(string name, string uuid) : name(move(name)), uuid(move(uuid))
+  {}
 
-    void add(Message message);
-    void remove(Message message);
+  explicit Conversation(string name) : name(move(name))
+  {
+    this->uuid = this->name + "-uuid";
+  }
+
+  void add(Message *message);
+
+  void remove(Message message);
 };

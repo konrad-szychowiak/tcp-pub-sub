@@ -167,6 +167,7 @@ document.addEventListener('alpine:init', () => {
         postMessage(text) {
             Alpine.store('conversations').postMessageIn(text, this.getID())
             this.set(this.getID())
+            postNewMessage(this.getID(), text)
         }
     })
     Alpine.store('view', {
@@ -191,6 +192,11 @@ document.addEventListener('alpine:init', () => {
         },
     })
 })
+
+function postNewMessage(id, text)
+{
+    window.api.send('app:post-msg', {id, text})
+}
 
 function readMessages(conversarionId)
 {
