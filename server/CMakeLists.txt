@@ -6,4 +6,32 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options(-Wall)
 add_link_options(-pthread)
 
-add_executable(server src/main.cpp src/socket.cc src/socket.hh src/server.cc src/server.hh src/logger.cc src/logger.hh)
+add_executable(server src/main.cpp
+
+        src/socket.cc
+        src/server.cc
+        src/logger.cc
+                src/ConversationsListener.cpp
+                src/ConversationsManager.cpp
+                src/Conversation.cpp
+                src/Message.cpp
+
+        src/abstract/Listener.cpp
+        src/abstract/Notifier.cpp
+                src/abstract/Visitable.cpp
+                src/abstract/Visitor.cpp
+
+        src/socket.hh
+        src/server.hh
+        src/logger.hh
+#        src/ConversationsListener.h
+#        src/ConversationsManager.h
+#        src/Conversation.h
+#        src/Message.h
+        src/abstract/Notifier.h
+        src/abstract/Listener.h
+#        src/abstract/Visitable.h
+#        src/abstract/Visitor.h
+
+
+        )

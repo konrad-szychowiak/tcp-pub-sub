@@ -20,7 +20,7 @@ public:
 
   ~Server();
 
-  int handle(int(&connection_handler)(int))
+  int connection(int(&connection_handler)(int))
   {
     return socket->_accept(&connection_handler);
   }
