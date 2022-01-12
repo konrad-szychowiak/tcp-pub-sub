@@ -50,10 +50,9 @@ window.api.on('fm', (e, data) => {
     console.error('fm event is deprecated')
 })
 
-window.api.on("fromMain", (e, data) => {
-    console.warn('fromMain event is deprecated')
+window.api.on("tcp:data", (e, data) => {
     console.log(`Received ${data} from main process`);
-    document.getElementById('more').innerText = data
+    Alpine.store('conversations').postMessageIn(data, 0);
 });
 
 function handleConnect() {
@@ -204,6 +203,7 @@ function readMessages(conversarionId)
 function subscribeTo(conversationId) {
     Alpine.store('unsubscribed').remove(conversationId)
     Alpine.store('subscribed').add(conversationId)
+    window.api.send('app:subscribe', {id: conversationId})
 }
 
 function unsubscribe(conversationId) {
@@ -225,4 +225,10 @@ function destroyPublished(id) {
     Alpine.store('conversations').remove(id)
     Alpine.store('authored').remove(id)
     window.api.send("app:delete-conversation", {id});
+}
+
+function logOut()
+{
+    Alpine.store('view').logOut()
+    window.api.send('client-exit', '');
 }

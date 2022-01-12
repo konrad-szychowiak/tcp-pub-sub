@@ -11,11 +11,12 @@ using namespace std;
 class ConversationsManager : public Notifier, Visitable
 {
 private:
-    map<int, Conversation> conversations;
     int newConversationId = 0;
 
 public:
-    void addConversation(Conversation conversation);
+    map<int, Conversation*> conversations;
+
+    void addConversation(Conversation* conversation);
     void removeConversationById(int id);
-    Conversation getConversationById(int id);
+    Conversation *getConversationById(int id);
 };

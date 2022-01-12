@@ -10,38 +10,46 @@ import {TcpMiddleware} from "./tcp/TcpMiddleware";
 
 
 function setupActions(window: BrowserWindow): void {
-  const client = new net.Socket();
+  let client: net.Socket;
   const appState = new Store()
   const tcpMiddleware = new TcpMiddleware(window.webContents, appState)
 
 
-  ipcMain.on('client-exit', (event, code?: number) => {
-    app.exit(code)
-  })
-
   ipcMain.on('tcp-connection-details', (event, payload: { host: string, port: number }) => {
     const client = new net.Socket();
-    const appState = new Store()
-    const tcpMiddleware = new TcpMiddleware(window.webContents, appState)
+    // const appState = new Store()
+    // const tcpMiddleware = new TcpMiddleware(window.webContents, appState)
 
     const {host, port} = payload;
     console.log(`connect with options:`, payload)
 
+    ipcMain.on('client-exit', (event, code?: number) => {
+      client.destroy()
+      // app.exit(code)
+    })
 
+    ipcMain.on('app:subscribe', (event, payload: {id: number}) => {
+      console.log(payload);
+      client.write(`S,${payload.id};`)
+    });
 
     ipcMain.on('app:create-conversation', (event, payload: { name: string }) => {
       console.log(payload)
       const {name} = payload
       appState.createConversation(name)
       tcpMiddleware.onListConversations()
-    })
+      // todo
+      client.write(`C,${name};`);
+    });
 
     ipcMain.on('app:delete-conversation', (event, payload: { id: number }) => {
       console.log(payload)
       const {id} = payload
       appState.deleteConversationById(id)
       tcpMiddleware.onListConversations()
-    })
+      // todo
+      client.write(`D,${id};`)
+    });
 
     client.connect(port, host);
 
@@ -66,7 +74,6 @@ function setupActions(window: BrowserWindow): void {
       // todo
       tcpMiddleware.onData(data)
       window.webContents.send('fm', data.toString());
-      client.destroy()
     });
 
     let allData = fromEvent(client, 'data', (buffer: Buffer) => buffer.toString())

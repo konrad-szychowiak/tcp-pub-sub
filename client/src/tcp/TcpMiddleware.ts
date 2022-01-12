@@ -26,7 +26,7 @@ export class TcpMiddleware {
     return 'Connected to the server'
   }
 
-  @reEmmit('tcp-data')
+  @reEmmit('tcp:data')
   onData(data: Buffer) {
     return data.toString()
   }

@@ -19,8 +19,9 @@ void Notifier::notifyAll()
   }
 }
 
-void Notifier::updateOne(Listener *listener)
+void Notifier::notifyOne(Listener *listener)
 {
+  cout << "not one\n";
   listener->update(this);
 }
 

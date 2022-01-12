@@ -1,17 +1,18 @@
 #include "ConversationsManager.h"
 
-void ConversationsManager::addConversation(Conversation conversation)
+void ConversationsManager::addConversation(Conversation *conversation)
 {
-     conversations.insert({newConversationId, conversation});
-     newConversationId++;
+  conversation->id = newConversationId;
+  conversations.insert({newConversationId, conversation});
+  newConversationId++;
 }
 
 void ConversationsManager::removeConversationById(int id)
 {
-    conversations.erase(id);
+  conversations.erase(id);
 }
 
-Conversation ConversationsManager::getConversationById(int id)
+Conversation *ConversationsManager::getConversationById(int id)
 {
-    return conversations[id];
+  return conversations[id];
 }

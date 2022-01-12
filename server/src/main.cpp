@@ -31,7 +31,6 @@ void *ThreadBehavior(void *t_data);
 int connectionHandlerFactory(int connection_socket_descriptor);
 
 ConversationsManager state;
-//Notifier no = Notifier();
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +39,17 @@ int main(int argc, char *argv[])
 
   auto logger = new Logger(argv[0]);
   auto server = new Server(SERVER_PORT, QUEUE_SIZE, logger);
+
+
+  auto hello = new Conversation("Hello");
+  state.addConversation(hello);
+
+  auto world = new Conversation("World");
+  state.addConversation(world);
+
+  auto ala = new Conversation("Ala ma kota");
+  state.addConversation(ala);
+
 
   while (server->connection(connectionHandlerFactory))
   {}
@@ -53,38 +63,78 @@ int main(int argc, char *argv[])
 
 void *ThreadBehavior(void *t_data)
 {
+  // after create //
   pthread_detach(pthread_self());
   struct thread_data_t *th_data = (struct thread_data_t *) t_data;
 
   auto sd = (*th_data).connection_socket_descriptor;
 
-  // before read //
   cout << "[log] socket descriptor is {" << sd << "}\n";
+ 
+
+  // before read //
+  auto handler = new ConnectionHandler(sd);
 
   /**
    * Create listener that awaits updates about the list of conversations
    */
   auto conversationsListener = new ConversationsListener(sd);
 
-  const char *answer = "Hello, world!\n";
-  write(sd, answer, strlen(answer)+1);
+//  const char *answer = "Hello, world!\n";
+//  write(sd, answer, strlen(answer)+1);
 
   // FIXME access via mutex
   state.addListener(conversationsListener);
-  sleep(5);
-  state.notifyAll();
+  state.notifyOne(conversationsListener);
 
-  // read
+  // read //
   char packSymbol;
+  string fullMessage;
 
   while(read(sd, &packSymbol, sizeof(char)) > 0)
   {
     cout << "[thread:" << sd << "] received: " << packSymbol << endl;
-    switch (condition)
-    {
-      
+
+    /**
+     * assemble incoming data character by character
+     */
+    if ( packSymbol == ';' )
+    { // todo handle full message here
+      char initial = fullMessage.at(0);
+      switch (initial)
+      {
+        case 'C': // create a new conversation // and subscribe to it?
+        {
+          cout << "creating a new conversation \n";
+          auto myNewConversation = new Conversation("/* todo: conversation should have a name */");
+          state.addConversation(myNewConversation);
+          state.notifyAll();
+          break;
+        }
+        case 'D': // delete an existing conversation
+        {
+          string strID = fullMessage.substr(2);
+          cout << "deleting an old conversation: " << strID << " \n";
+//          auto myOldConversation = state.getConversationById()
+          break;
+        }
+        case 'S': // Subscribe to an existing conversation
+        {
+          // fixme
+          cerr << "[unimplemented] subscribe to a conversation -> " << fullMessage << endl;
+          break;
+        }
+        default:
+        {
+          cerr << "[error] incomprehensible message from a client\n";
+        }
+      }
+      // ^ extract above to a function ^ //
+      fullMessage = "";
     }
-    state.addConversation()
+    else {
+      fullMessage += packSymbol;
+    }
   }
 
   cout << "[thread:" << sd << "] connection closed\n";

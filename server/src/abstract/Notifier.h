@@ -20,6 +20,6 @@ public:
   void
   notifyAll();
 
-  void updateOne(Listener*listener);
+  void notifyOne(Listener*listener);
 };
 

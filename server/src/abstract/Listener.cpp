@@ -5,9 +5,7 @@
 
 void Listener::send()
 {
-  const char *answer = "Hello from a listener!";
-  cout << "[log:" << connectionSocket << "] writing from here\n";
-  write(connectionSocket, answer, strlen(answer)+1);
+//  cout << "[log:" << connectionSocket << "] writing from here\n";
 }
 
 void Listener::update(Observable *observable)

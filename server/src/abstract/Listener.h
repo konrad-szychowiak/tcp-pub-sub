@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include "Observable.hh"
 //#include "Notifier.h"
@@ -7,13 +8,17 @@ using namespace std;
 
 class Listener
 {
+protected:
+  string message;
+
 public:
-    int connectionSocket;
+  int connectionSocket;
 
-    Listener(int socketDescriptor) : connectionSocket(socketDescriptor) {}
+  Listener(int socketDescriptor) : connectionSocket(socketDescriptor)
+  {}
 
-    void update(Observable *observable);
+  virtual void update(Observable *observable);
 
-    void send();
+  virtual void send();
 };
 
