@@ -25,8 +25,8 @@ public:
     auto actual = (ConversationsManager*) observable;
     for (auto p : actual->conversations)
     {
-      message += "," + to_string(p.first);
-      message += "," + (*p.second).name;
+      message += "\t" + to_string(p.first);
+      message += "\t" + (*p.second).name;
 //      cout << message << endl;
     }
     send();
@@ -50,5 +50,6 @@ public:
     const char *answer = message.c_str();
     cout << answer << endl;
     write(connectionSocket, answer, strlen(answer) + 1);
+    message = "";
   }
 };

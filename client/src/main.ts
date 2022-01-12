@@ -30,7 +30,7 @@ function setupActions(window: BrowserWindow): void {
 
     ipcMain.on('app:subscribe', (event, payload: {id: number}) => {
       console.log(payload);
-      client.write(`S,${payload.id};`)
+      client.write(`S\t${payload.id};`)
     });
 
     ipcMain.on('app:create-conversation', (event, payload: { name: string }) => {
@@ -39,7 +39,7 @@ function setupActions(window: BrowserWindow): void {
       appState.createConversation(name)
       tcpMiddleware.onListConversations()
       // todo
-      client.write(`C,${name};`);
+      client.write(`C\t${name};`);
     });
 
     ipcMain.on('app:delete-conversation', (event, payload: { id: number }) => {
@@ -48,7 +48,7 @@ function setupActions(window: BrowserWindow): void {
       appState.deleteConversationById(id)
       tcpMiddleware.onListConversations()
       // todo
-      client.write(`D,${id};`)
+      client.write(`D\t${id};`)
     });
 
     client.connect(port, host);
