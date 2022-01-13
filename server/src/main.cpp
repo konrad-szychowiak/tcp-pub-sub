@@ -6,7 +6,6 @@
 #include "abstract/Notifier.h"
 #include "ConversationsManager.h"
 #include "listeners/ConversationsListener.h"
-#include "ConnectionHandler.h"
 #include "listeners/MessagesListener.h"
 
 #define SERVER_PORT 8080

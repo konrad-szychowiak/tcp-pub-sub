@@ -11,6 +11,6 @@ export function setupWindow()
       preload: path.join(__dirname, "preload.js") // use a preload script
     }
   });
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
   return win
 }
