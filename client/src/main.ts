@@ -3,8 +3,6 @@ import path from "path";
 import net from "net";
 import * as process from "process";
 import {setupWindow} from "./main/index";
-import {fromEvent} from "baconjs";
-import {Buffer} from "buffer";
 import {Store} from "./main/Store";
 import {TcpMiddleware} from "./tcp/TcpMiddleware";
 import {Pack} from "./tcp/Pack";
@@ -23,7 +21,7 @@ function setupActions(window: BrowserWindow): void {
 
     ipcMain.on('client-exit', (event, code?: number) => {
       client.destroy()
-      appState.resetAll();
+      appState.resetConversations();
       // app.exit(code)
     })
 
@@ -61,13 +59,8 @@ function setupActions(window: BrowserWindow): void {
     client.connect(port, host);
 
     client.on('connect', async () => {
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-      // todo
       tcpMiddleware.onConnect()
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-      // tcpMiddleware.onListConversations()
       console.log('CONNECTED TO: ' + host + ':' + port);
-      // window.webContents.send('fromMain', `CONNECTED TO: ${host}:${port}`);
     })
 
     client.on('error', err => {
@@ -76,6 +69,7 @@ function setupActions(window: BrowserWindow): void {
 
     client.on('end', () => {
       tcpMiddleware.onEnd();
+      client.destroy()
     })
 
     // Add a 'data' event handler for the client socket

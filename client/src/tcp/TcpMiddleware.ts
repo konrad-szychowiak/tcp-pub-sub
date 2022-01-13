@@ -69,6 +69,11 @@ export class TcpMiddleware {
     return error
   }
 
+  @reEmmit('app:server-end')
+  onEnd()
+  {
+    return 'Server just closed. Retry later or try another server.'
+  }
 
 
   // static subscribeToConversation() {
