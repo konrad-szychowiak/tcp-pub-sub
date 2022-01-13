@@ -134,14 +134,14 @@ void *ThreadBehavior(void *t_data)
           auto convo = state.getConversationById(myNewConversation->id);
           convo->addListener(createdConversationListener);
           createdConversationListener->conversation = convo;
-          createdListeners.push_back(createdConversationListener);
+          createdListeners.insert({convo->id, createdConversationListener});
 
           break;
         }
-        /**
-         * Delete a conversation
-         * @param id
-         */
+          /**
+           * Delete a conversation
+           * @param id
+           */
         case 'D':
         {
           string strID = fullMessage.substr(2);
@@ -152,10 +152,10 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
-        /**
-         * Subscribe to an existing conversation
-         * @param id ID of the target conversation
-         */
+          /**
+           * Subscribe to an existing conversation
+           * @param id ID of the target conversation
+           */
         case 'S': // Subscribe to an existing conversation
         {
           string strID = fullMessage.substr(2);
@@ -203,11 +203,11 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
-        /**
-         * Post a new message
-         * @param id
-         * @param content text of the message
-         */
+          /**
+           * Post a new message
+           * @param id
+           * @param content text of the message
+           */
         case 'P':
         {
           string withoutSymbol = fullMessage.substr(2);
