@@ -1,6 +1,7 @@
 # Sprawozdanie z projektu
 
 > Konrad Szychowiak 144564
+> Julia Auguścik 145172
 
 ## Temat: System wymiany komunikatów publish/subscribe
 
