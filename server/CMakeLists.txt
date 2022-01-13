@@ -33,4 +33,8 @@ add_executable(server src/main.cpp
 #        src/abstract/Visitor.h
 
 
+#       src/visitors/ConversationsVisitor.h
+#       src/visitors/MessagesVisitor.h
+
+
         src/abstract/Observable.cc src/abstract/Observable.hh)
