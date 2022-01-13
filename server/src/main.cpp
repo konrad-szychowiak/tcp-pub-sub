@@ -80,6 +80,8 @@ void *ThreadBehavior(void *t_data)
    * Create listener that awaits updates about the list of conversations
    */
   auto conversationsListener = new ConversationsListener(sd);
+  vector<Conversation*> createdConversations;
+  vector<MessagesListener*> createdListeners;
 
 //  const char *answer = "Hello, world!\n";
 //  write(sd, answer, strlen(answer)+1);
@@ -112,12 +114,15 @@ void *ThreadBehavior(void *t_data)
           string uuid = withoutSymbol.substr(dividerPosition+1);
           cout << "creating a new conversation :: " << name << " :: " << uuid << endl;
           auto myNewConversation = new Conversation(name, uuid);
-
+          createdConversations.push_back(myNewConversation);
           state.addConversation(myNewConversation);
           state.notifyAll();
 
           auto createdConversationListener = new MessagesListener(sd);
-          state.getConversationById(myNewConversation->id)->addListener(createdConversationListener);
+          auto convo = state.getConversationById(myNewConversation->id);
+          convo->addListener(createdConversationListener);
+          createdConversationListener->conversation = convo;
+          createdListeners.push_back(createdConversationListener);
 
           break;
         }
@@ -139,7 +144,10 @@ void *ThreadBehavior(void *t_data)
           cerr << "[unimplemented] subscribe to a conversation: " << id << endl;
 
           auto subscribedConversationListener = new MessagesListener(sd);
-          state.getConversationById(id)->addListener(subscribedConversationListener);
+          auto convo = state.getConversationById(id);
+          convo->addListener(subscribedConversationListener);
+          subscribedConversationListener->conversation = convo;
+          createdListeners.push_back(subscribedConversationListener);
 
           break;
         }
@@ -174,6 +182,19 @@ void *ThreadBehavior(void *t_data)
   cout << "[thread:" << sd << "] connection closed\n";
 
   // cleanup //
+  for(auto listener : createdListeners)
+  {
+    auto convo = listener->conversation;
+    convo->removeListener(listener);
+    delete listener;
+  }
+
+  for(auto conversation : createdConversations)
+  {
+    state.removeConversationById(conversation->id);
+    state.notifyAll();
+    delete conversation;
+  }
 
   state.removeListener(conversationsListener);
   delete conversationsListener;

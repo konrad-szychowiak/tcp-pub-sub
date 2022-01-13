@@ -7,6 +7,8 @@ using namespace std;
 class MessagesListener : public Listener
 {
 public:
+  Conversation* conversation = nullptr;
+
   explicit
   MessagesListener(int connectionSocketDescriptor)
       : Listener(connectionSocketDescriptor)
