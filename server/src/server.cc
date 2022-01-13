@@ -21,3 +21,8 @@ Server::~Server()
   socket->_close();
   delete this->socket;
 }
+
+int Server::connection(int (&connection_handler)(int))
+{
+  return socket->_accept(&connection_handler);
+}

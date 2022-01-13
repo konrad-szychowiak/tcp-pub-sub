@@ -12,6 +12,7 @@ add_executable(server src/main.cpp
         src/server.cc
         src/logger.cc
         src/listeners/ConversationsListener.cpp
+        src/listeners/MessagesListener.cpp
                 src/ConversationsManager.cpp
                 src/Conversation.cpp
                 src/Message.cpp
@@ -19,6 +20,9 @@ add_executable(server src/main.cpp
         src/abstract/Listener.cpp
         src/abstract/Notifier.cpp
         src/abstract/visiting.cpp
+
+            src/visitors/ConversationsVisitor.cpp
+            src/visitors/MessagesVisitor.cpp
 
         src/socket.hh
         src/server.hh

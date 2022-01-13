@@ -7,9 +7,7 @@
 
 
 class Observable
-{
-
-};
+{};
 
 
 #endif //SERVER_OBSERVABLE_HH

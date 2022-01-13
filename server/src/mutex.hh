@@ -12,6 +12,12 @@
 
 typedef pthread_mutex_t Mutex;
 
+/**
+ * Guards access to any call to write() on connection sockets
+ */
 Mutex writeAccess = PTHREAD_MUTEX_INITIALIZER;
+
+// fixme
+// Mutex clientsCountAccess = PTHREAD_MUTEX_INITIALIZER;
 
 #endif //SERVER_MUTEX_HH

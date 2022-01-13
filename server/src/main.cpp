@@ -1,16 +1,15 @@
 #include <unistd.h>
-#include <cstring>
+#include <string>
 #include <pthread.h>
 #include <iostream>
 #include "server.hh"
 #include "abstract/Notifier.h"
-#include "abstract/Listener.h"
 #include "ConversationsManager.h"
 #include "listeners/ConversationsListener.h"
 #include "ConnectionHandler.h"
 #include "listeners/MessagesListener.h"
 
-#define SERVER_PORT 8989
+#define SERVER_PORT 8080
 #define QUEUE_SIZE 5
 
 
@@ -21,36 +20,38 @@
 struct thread_data_t
 {
   int connection_socket_descriptor;
-
 };
 
 /**
- * Funkcja opisującą zachowanie wątku - musi przyjmować argument typu (void *) i zwracać (void *)
- * @param t_data
+ * Data about all the active conversations on the server.
  */
-void *ThreadBehavior(void *t_data);
+ConversationsManager state;
 
+// fixme
+//int clientCounter;
+
+
+void *ThreadBehavior(void *t_data);
 int connectionHandlerFactory(int connection_socket_descriptor);
 
-ConversationsManager state;
 
 int main(int argc, char *argv[])
 {
 
-  cout << "\n";
+//  cout << "\n";
 
   auto logger = new Logger(argv[0]);
   auto server = new Server(SERVER_PORT, QUEUE_SIZE, logger);
 
 
-  auto hello = new Conversation("Hello");
-  state.addConversation(hello);
-
-  auto world = new Conversation("World");
-  state.addConversation(world);
-
-  auto ala = new Conversation("Ala ma kota");
-  state.addConversation(ala);
+//  auto hello = new Conversation("Hello");
+//  state.addConversation(hello);
+//
+//  auto world = new Conversation("World");
+//  state.addConversation(world);
+//
+//  auto ala = new Conversation("Ala ma kota");
+//  state.addConversation(ala);
 
 
   while (server->connection(connectionHandlerFactory))
@@ -62,34 +63,39 @@ int main(int argc, char *argv[])
   return (0);
 }
 
-
+/**
+ * Funkcja opisującą zachowanie wątku - musi przyjmować argument typu (void *) i zwracać (void *)
+ * @param t_data
+ */
 void *ThreadBehavior(void *t_data)
 {
   // after create //
-  pthread_detach(pthread_self());
-  struct thread_data_t *th_data = (struct thread_data_t *) t_data;
 
+  pthread_detach(pthread_self());
+  auto *th_data = (struct thread_data_t *) t_data;
   auto sd = (*th_data).connection_socket_descriptor;
 
-  cout << "[log] socket descriptor is {" << sd << "}\n";
+  vector<Conversation *> createdConversations;
+  map<int, MessagesListener *> createdListeners;
 
 
   // before read //
-  auto handler = new ConnectionHandler(sd);
 
   /**
    * Create listener that awaits updates about the list of conversations
    */
   auto conversationsListener = new ConversationsListener(sd);
-  vector<Conversation *> createdConversations;
-  map<int, MessagesListener *> createdListeners;
-
-//  const char *answer = "Hello, world!\n";
-//  write(sd, answer, strlen(answer)+1);
-
-  // FIXME access via mutex
+  /**
+   * Listen for changes in the list of conversations
+   */
   state.addListener(conversationsListener);
+  /**
+   * Send the up-to-date list of conversations to the connected client
+   */
   state.notifyOne(conversationsListener);
+
+  // log //
+  cout << "[log:" << sd << "] new connection established and ready\n";
 
   // read //
   char packSymbol;
@@ -97,23 +103,29 @@ void *ThreadBehavior(void *t_data)
 
   while (read(sd, &packSymbol, sizeof(char)) > 0)
   {
-    cout << "[thread:" << sd << "] received: " << packSymbol << endl;
-
     /**
      * assemble incoming data character by character
      */
     if (packSymbol == ';')
-    { // todo handle full message here
+    {
       char initial = fullMessage.at(0);
       switch (initial)
       {
-        case 'C': // create a new conversation // and subscribe to it?
+        /**
+         * Create a new conversation
+         * @param name name of the conversation
+         * @param uuid unique identifier for the sake of clients
+         */
+        case 'C':
         {
           string withoutSymbol = fullMessage.substr(2);
           int dividerPosition = withoutSymbol.find('\t');
+
           string name = withoutSymbol.substr(0, dividerPosition);
           string uuid = withoutSymbol.substr(dividerPosition + 1);
-          cout << "creating a new conversation :: " << name << " :: " << uuid << endl;
+
+          cout << "[log:" << sd << "] create a new conversation :: " << name << " :: " << uuid << endl;
+
           auto myNewConversation = new Conversation(name, uuid);
           createdConversations.push_back(myNewConversation);
           state.addConversation(myNewConversation);
@@ -127,7 +139,11 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
-        case 'D': // delete an existing conversation
+        /**
+         * Delete a conversation
+         * @param id
+         */
+        case 'D':
         {
           string strID = fullMessage.substr(2);
           int id = atoi(strID.c_str());
@@ -188,7 +204,12 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
-        case 'P': // post (new) message <id> <content>
+        /**
+         * Post a new message
+         * @param id
+         * @param content text of the message
+         */
+        case 'P':
         {
           string withoutSymbol = fullMessage.substr(2);
           int dividerPosition = withoutSymbol.find('\t');
@@ -208,7 +229,6 @@ void *ThreadBehavior(void *t_data)
           cerr << "[error] incomprehensible message from a client\n";
         }
       }
-      // ^ extract above to a function ^ //
       fullMessage = "";
     }
     else
@@ -217,18 +237,18 @@ void *ThreadBehavior(void *t_data)
     }
   }
 
-  cout << "[thread:" << sd << "] connection closed\n";
+  cout << "[log:" << sd << "] connection closed\n";
 
   // cleanup //
+
   for (auto pair: createdListeners)
   {
     auto listener = pair.second;
     auto convo = listener->conversation;
-    convo->removeListener(listener);
+    if (convo != nullptr)
+    { convo->removeListener(listener); }
     delete listener;
   }
-
-  createdListeners.clear();
 
   for (auto conversation: createdConversations)
   {
@@ -236,8 +256,6 @@ void *ThreadBehavior(void *t_data)
     state.notifyAll();
     delete conversation;
   }
-
-  createdConversations.clear();
 
   state.removeListener(conversationsListener);
   delete conversationsListener;
@@ -255,32 +273,20 @@ void *ThreadBehavior(void *t_data)
  */
 int connectionHandlerFactory(int connection_socket_descriptor)
 {
-  // uchwyt na wątek
+  /**
+   * uchwyt na wątek
+   */
   pthread_t connectionThread;
-  // wynik funkcji tworzącej wątek
-  int create_result = 0;
-
-
-  //dane, które zostaną przekazane do wątku
-  //TODO dynamiczne utworzenie instancji struktury thread_data_t o nazwie t_data (+ w odpowiednim miejscu zwolnienie pamięci)
-  //TODO wypełnienie pól struktury
 
   auto t_data = new thread_data_t{connection_socket_descriptor};
   t_data->connection_socket_descriptor = connection_socket_descriptor;
 
-  create_result = pthread_create(&connectionThread, NULL, ThreadBehavior, (void *) t_data);
+  int create_result = pthread_create(&connectionThread, NULL, ThreadBehavior, (void *) t_data);
   if (create_result)
   {
     printf("Błąd przy próbie utworzenia wątku, kod błędu: %d\n", create_result);
     exit(-1);
   }
-
-  //TODO (przy zadaniu 1) odbieranie -> wyświetlanie albo klawiatura -> wysyłanie
-
-//  pthread_join(connectionThread, NULL);
-
-//
-
 
   return 1;
 }

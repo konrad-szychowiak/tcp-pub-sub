@@ -3,11 +3,13 @@
 #include <unistd.h>
 #include "../abstract/Listener.h"
 #include "../ConversationsManager.h"
+#include "../visitors/ConversationsVisitor.h"
 
 using namespace std;
 
 template<typename Base, typename T>
-inline bool instanceof(const T*) {
+inline bool instanceof(const T *)
+{
   return is_base_of<Base, T>::value;
 }
 
@@ -21,26 +23,5 @@ public:
 
   void
   update(Observable *observable)
-  override {
-    auto actual = (ConversationsManager*) observable;
-    for (auto p : actual->conversations)
-    {
-      message += "\t" + to_string(p.first);
-      message += "\t" + (*p.second).name;
-      message += "\t" + (*p.second).uuid;
-    }
-    send();
-  }
-
-  void
-  send()
-  override
-  {
-//    Listener::send();
-    message = 'L' + message + ";";
-    const char *answer = message.c_str();
-    cout << answer << endl;
-    write(connectionSocket, answer, strlen(answer) + 1);
-    message = "";
-  }
+  override;
 };

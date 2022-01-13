@@ -24,10 +24,7 @@ public:
   Conversation(string name, string uuid) : name(move(name)), uuid(move(uuid))
   {}
 
-  explicit Conversation(string name) : name(move(name))
-  {
-    this->uuid = this->name + "-uuid";
-  }
+  explicit Conversation(string name);
 
   void add(Message *message);
 

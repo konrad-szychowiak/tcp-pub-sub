@@ -20,6 +20,9 @@
 #include <pthread.h>
 #include <iostream>
 
+/**
+ * Class that hides native sockets.
+ */
 class Socket
 {
 private:
