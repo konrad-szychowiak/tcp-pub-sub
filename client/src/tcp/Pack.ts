@@ -1,25 +1,22 @@
-import Buffer from "buffer";
-
 type PackHead = { id: number } | { name: string }
 
 /**
- * Custom protocol package object
+ * Custom protocol messages
  */
 export class Pack {
-  private constructor(readonly symbol: string, head: PackHead, tail: string[]) {
+  static del(id: number) {
+    return `D\t${id};`;
   }
 
-  /**
-   * Parse data buffer and run an appropriate protocol action
-   * @param buffer
-   */
-  static fromBuffer(buffer: Buffer) {
+  static post(id: number, message: string) {
+    return `P\t${id}\t${message};`;
   }
 
-  toBuffer()
-  // todo
-  // : Buffer
-  // Convert the package into socket-transferable buffer.
-  {
+  static subscribe(id: number) {
+    return `S\t${id};`
+  }
+
+  static unsubscribe(id: number) {
+    return `U\t${id};`
   }
 }

@@ -212,13 +212,11 @@ function unsubscribe(conversationId) {
     Alpine.store('activeConversation').unset()
     Alpine.store('subscribed').remove(conversationId)
     Alpine.store('unsubscribed').add(conversationId)
+    window.api.send('app:unsubscribe', {id: conversationId})
+    console.warn('unsubscribe : ', conversationId)
 }
 
 function publishConversation(name) {
-    // const newConversation = conversationFactory(name, [], true)
-    // console.log(newConversation)
-    // Alpine.store('conversations').value.push(newConversation)
-    // Alpine.store('authored').add(newConversation.id)
     window.api.send("app:create-conversation", {name});
 }
 

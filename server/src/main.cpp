@@ -13,6 +13,7 @@
 #define SERVER_PORT 8989
 #define QUEUE_SIZE 5
 
+
 /**
  * @struct
  * struktura zawierająca dane, które zostaną przekazane do wątku
@@ -71,7 +72,7 @@ void *ThreadBehavior(void *t_data)
   auto sd = (*th_data).connection_socket_descriptor;
 
   cout << "[log] socket descriptor is {" << sd << "}\n";
- 
+
 
   // before read //
   auto handler = new ConnectionHandler(sd);
@@ -80,8 +81,8 @@ void *ThreadBehavior(void *t_data)
    * Create listener that awaits updates about the list of conversations
    */
   auto conversationsListener = new ConversationsListener(sd);
-  vector<Conversation*> createdConversations;
-  vector<MessagesListener*> createdListeners;
+  vector<Conversation *> createdConversations;
+  map<int, MessagesListener *> createdListeners;
 
 //  const char *answer = "Hello, world!\n";
 //  write(sd, answer, strlen(answer)+1);
@@ -94,14 +95,14 @@ void *ThreadBehavior(void *t_data)
   char packSymbol;
   string fullMessage;
 
-  while(read(sd, &packSymbol, sizeof(char)) > 0)
+  while (read(sd, &packSymbol, sizeof(char)) > 0)
   {
     cout << "[thread:" << sd << "] received: " << packSymbol << endl;
 
     /**
      * assemble incoming data character by character
      */
-    if ( packSymbol == ';' )
+    if (packSymbol == ';')
     { // todo handle full message here
       char initial = fullMessage.at(0);
       switch (initial)
@@ -111,7 +112,7 @@ void *ThreadBehavior(void *t_data)
           string withoutSymbol = fullMessage.substr(2);
           int dividerPosition = withoutSymbol.find('\t');
           string name = withoutSymbol.substr(0, dividerPosition);
-          string uuid = withoutSymbol.substr(dividerPosition+1);
+          string uuid = withoutSymbol.substr(dividerPosition + 1);
           cout << "creating a new conversation :: " << name << " :: " << uuid << endl;
           auto myNewConversation = new Conversation(name, uuid);
           createdConversations.push_back(myNewConversation);
@@ -122,7 +123,7 @@ void *ThreadBehavior(void *t_data)
           auto convo = state.getConversationById(myNewConversation->id);
           convo->addListener(createdConversationListener);
           createdConversationListener->conversation = convo;
-          createdListeners.push_back(createdConversationListener);
+          createdListeners.insert({convo->id, createdConversationListener});
 
           break;
         }
@@ -136,18 +137,54 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
+          /**
+           * Subscribe to an existing conversation
+           * @param id ID of the target conversation
+           */
         case 'S': // Subscribe to an existing conversation
         {
           string strID = fullMessage.substr(2);
           int id = atoi(strID.c_str());
-          // fixme
-          cerr << "[unimplemented] subscribe to a conversation: " << id << endl;
-
           auto subscribedConversationListener = new MessagesListener(sd);
           auto convo = state.getConversationById(id);
           convo->addListener(subscribedConversationListener);
           subscribedConversationListener->conversation = convo;
-          createdListeners.push_back(subscribedConversationListener);
+          createdListeners.insert({convo->id, subscribedConversationListener});
+
+          break;
+        }
+          /**
+           * Unsubscribe
+           * @param id ID of the target conversation
+           */
+        case 'U':
+        {
+          string strID = fullMessage.substr(2);
+          int id = atoi(strID.c_str());
+
+          cout << "[unsubscribe] to " << fullMessage << endl;
+
+          /**
+           * find a conversation by the given id
+           */
+          auto convo = state.getConversationById(id);
+          /**
+           * find the listener created for the given conversation
+           */
+          auto listener = createdListeners[id];
+          /**
+           * remove the listener from the conversations
+           * AKA <i>unsubscribe</i>
+           */
+          convo->removeListener(listener);
+          /**
+           * remove entry about that listener from the collection of created listeners
+           */
+          createdListeners.erase(convo->id);
+          /**
+           * free the memory and delete the listener
+           */
+          delete listener;
 
           break;
         }
@@ -157,11 +194,11 @@ void *ThreadBehavior(void *t_data)
           int dividerPosition = withoutSymbol.find('\t');
           string strID = withoutSymbol.substr(0, dividerPosition);
           int id = atoi(strID.c_str());
-          string content = withoutSymbol.substr(dividerPosition+1);
+          string content = withoutSymbol.substr(dividerPosition + 1);
           cout << "post a msg in :: " << strID << " :with content: " << content << endl;
 
           auto targetConversation = state.getConversationById(id);
-          targetConversation->add(new Message(0,"a", content));
+          targetConversation->add(new Message(0, "a", content));
           targetConversation->notifyAll();
 
           break;
@@ -174,7 +211,8 @@ void *ThreadBehavior(void *t_data)
       // ^ extract above to a function ^ //
       fullMessage = "";
     }
-    else {
+    else
+    {
       fullMessage += packSymbol;
     }
   }
@@ -182,19 +220,24 @@ void *ThreadBehavior(void *t_data)
   cout << "[thread:" << sd << "] connection closed\n";
 
   // cleanup //
-  for(auto listener : createdListeners)
+  for (auto pair: createdListeners)
   {
+    auto listener = pair.second;
     auto convo = listener->conversation;
     convo->removeListener(listener);
     delete listener;
   }
 
-  for(auto conversation : createdConversations)
+  createdListeners.clear();
+
+  for (auto conversation: createdConversations)
   {
     state.removeConversationById(conversation->id);
     state.notifyAll();
     delete conversation;
   }
+
+  createdConversations.clear();
 
   state.removeListener(conversationsListener);
   delete conversationsListener;
