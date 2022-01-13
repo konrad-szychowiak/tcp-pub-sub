@@ -8,7 +8,7 @@
 #include <utility>
 #include <stdio.h>
 #include "Message.h"
-#include "abstract/Visitable.h"
+#include "abstract/visiting.h"
 #include "abstract/Notifier.h"
 
 using namespace std;

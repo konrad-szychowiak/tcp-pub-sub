@@ -18,8 +18,7 @@ add_executable(server src/main.cpp
 
         src/abstract/Listener.cpp
         src/abstract/Notifier.cpp
-                src/abstract/Visitable.cpp
-                src/abstract/Visitor.cpp
+        src/abstract/visiting.cpp
 
         src/socket.hh
         src/server.hh

@@ -4,7 +4,7 @@
 #include <map>
 #include "Conversation.h"
 #include "abstract/Notifier.h"
-#include "abstract/Visitable.h"
+#include "abstract/visiting.h"
 
 using namespace std;
 

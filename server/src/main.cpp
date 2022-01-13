@@ -10,7 +10,7 @@
 #include "ConnectionHandler.h"
 #include "listeners/MessagesListener.h"
 
-#define SERVER_PORT 1234
+#define SERVER_PORT 8989
 #define QUEUE_SIZE 5
 
 /**
