@@ -19,6 +19,14 @@ window.api.on('app:connection-error', (event, data) => {
     Alpine.store('view').logOut()
 })
 
+window.api.on('app:server-end', (event, data) => {
+    console.error(data)
+    Alpine.store('error', data.toString())
+    // console.log(Alpine.store('error'))
+    Alpine.store('view').logOut()
+    window.api.send('client-exit')
+})
+
 window.api.on('app:list-conversations', (event, data) => {
     // console.warn({event, data})
     Alpine.store('conversations').value = data
@@ -161,6 +169,7 @@ document.addEventListener('alpine:init', () => {
             return this.conv !== undefined;
         },
         postMessage(text) {
+            if (text === '') return;
             Alpine.store('conversations').postMessageIn(text, this.getID())
             this.set(this.getID())
             postNewMessage(this.getID(), text)
@@ -191,6 +200,7 @@ document.addEventListener('alpine:init', () => {
 
 function postNewMessage(id, text)
 {
+    if (text !== '')
     window.api.send('app:post-msg', {id, text})
 }
 
