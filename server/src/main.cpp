@@ -134,7 +134,7 @@ void *ThreadBehavior(void *t_data)
           auto convo = state.getConversationById(myNewConversation->id);
           convo->addListener(createdConversationListener);
           createdConversationListener->conversation = convo;
-          createdListeners.insert({convo->id, createdConversationListener});
+          createdListeners.push_back(createdConversationListener);
 
           break;
         }
@@ -152,10 +152,10 @@ void *ThreadBehavior(void *t_data)
 
           break;
         }
-          /**
-           * Subscribe to an existing conversation
-           * @param id ID of the target conversation
-           */
+        /**
+         * Subscribe to an existing conversation
+         * @param id ID of the target conversation
+         */
         case 'S': // Subscribe to an existing conversation
         {
           string strID = fullMessage.substr(2);
