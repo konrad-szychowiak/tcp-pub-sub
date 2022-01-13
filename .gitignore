@@ -5,3 +5,4 @@
 */*pnpm-lock.*
 */build/
 */web/
+*/out/

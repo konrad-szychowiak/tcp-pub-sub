@@ -42,12 +42,12 @@ window.api.on('app:list-conversations', (event, data) => {
 
     console.log(Alpine.store('unsubscribed'), Alpine.store('subscribed'), Alpine.store('authored'))
 
+    if (Alpine.store('activeConversation').conv) {
+        Alpine.store('activeConversation').set(Alpine.store('activeConversation').getID())
+    }
+
     // show //
     Alpine.store('view').connected()
-})
-
-window.api.on('fm', (e, data) => {
-    console.error('fm event is deprecated')
 })
 
 window.api.on("tcp:data", (e, data) => {
@@ -61,10 +61,6 @@ function handleConnect() {
     Alpine.store('view').connecting()
     Alpine.store('error', '')
     window.api.send("tcp-connection-details", {host, port});
-}
-
-function handleClientExit() {
-    window.api.exit()
 }
 
 // let last_id = 0;
@@ -236,5 +232,8 @@ function destroyPublished(id) {
 function logOut()
 {
     Alpine.store('view').logOut()
-    window.api.send('client-exit', '');
+    Alpine.store('unsubscribed').value = []
+    Alpine.store('subscribed').value = []
+    Alpine.store('authored').value = []
+    window.api.exit()
 }

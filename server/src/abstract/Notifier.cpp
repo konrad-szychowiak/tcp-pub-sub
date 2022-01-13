@@ -2,6 +2,7 @@
 
 void Notifier::addListener(Listener *listener)
 {
+  cout << listeners.size() << " <listeners>\n";
   listeners.push_back(listener);
 }
 

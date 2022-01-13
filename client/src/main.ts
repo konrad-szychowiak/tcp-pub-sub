@@ -26,6 +26,7 @@ function setupActions(window: BrowserWindow): void {
 
     ipcMain.on('client-exit', (event, code?: number) => {
       client.destroy()
+      appState.resetConversations();
       // app.exit(code)
     })
 
