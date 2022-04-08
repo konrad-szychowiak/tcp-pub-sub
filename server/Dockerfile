@@ -10,12 +10,9 @@ COPY CMakeLists.txt /app
 WORKDIR /app
 
 RUN cmake . && cmake --build .
-RUN ls -la
 
 FROM ubuntu
 
 COPY --from=builder /app/server /usr/bin/sk2server
-
-RUN ls -la /usr/bin
 
 CMD ["sk2server"]
