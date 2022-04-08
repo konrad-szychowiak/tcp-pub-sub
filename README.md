@@ -1,13 +1,16 @@
-# Sprawozdanie z projektu
+# TeeCeeP PS
 
-> Konrad Szychowiak 144564 <br>
-> Julia Auguścik 145172
+> A Simple publish-subscribe messaging app built on top of TCP sockets 
+> with a linux server and an Electron client
 
-## Temat: System wymiany komunikatów publish/subscribe
+## [Autorzy](https://github.com/konrad-szychowiak/tcp-pub-sub/graphs/contributors)
 
-### Opis protokołu komunikacyjnego
+> Konrad Szychowiak <br>
+> Julia Auguścik 
 
-Wiadomości przesyłane przez tcp mają następującą postać:
+## Opis protokołu komunikacyjnego
+
+Wiadomości przesyłane przez tcp mają następującą postać: (wiadomości są przesyłane jako tekst)
 
 * Każda wiadomość zaczyna się od symbolu typu komunikatu i kończy znakiem `;`
     ```
@@ -41,30 +44,31 @@ Wiadomości przesyłane przez tcp mają następującą postać:
 * po stronie klienta interpretacja przychodzących wiadomości ma miejsce w `TcpMiddleware.onData()` w pliku `client/src/tcp/TcpMiddleware.ts` a wiadomości tworzone są przez `Pack(.ts)`
 * po stronie klienta wiadomosci odbiera `ThreadBehavior` w `server/src/main.cpp` a wysyłają klasy oparte na klasie `Listener` na podstawie wiadomości stworzonych przez `Visitor`-ów.
 
-### Struktura projektu - opis implementacji
+### Struktura projektu: opis implementacji
 
-#### Serwer
-
-> serwer oparty na C++20
+<details>
+<summary>Serwer [C++20]</summary>
 
 1. Wątek główny (funkcja `main`) uruchamia serwer i rozpoczyna nasłuchiwanie.
-   + serwer tworzony jest przez klasę `Server` opartą na klasie `Socket`
-   + serwer odbiera połącznie używając funkcji `accept()` i przekazuje sterowanie do funkcji `connectionHandlerFactory`
+    + serwer tworzony jest przez klasę `Server` opartą na klasie `Socket`
+    + serwer odbiera połącznie używając funkcji `accept()` i przekazuje sterowanie do funkcji `connectionHandlerFactory`
 2. `connectionHandlerFactory` zapisuje do struktury `thread_data_t` deskryptor gniazda połączenia a następnie uruchamia funkcję `ThreadBehavior` w nowym wątku
 3. `ThreadBehavior` odpowiada za obsługę operacji wykonywanych przez pojedynczego klienta:
-   + rejestruje `ConversationsListener`, który zostanie powiadomiony przy każdej zmainie w liście konwersacji (dodanie/usunięcie)
-   + nasłuchuje w pętli na komunikaty przychodzące na socket używając funckji `read()` a następnie wykonuje odpowiednie akcje:
-     - _**S**ubscribe_: wyszukuje żądaną konwersację i tworzy dla niej `MessagesListener` – klasę która zostaje powiadomiona przy publikacji wiadomości
-     - _**U**nsubscribe_: usuwa `MessagesListener` dla podanej konwersacji 
-     - _**P**ost message_: dodaje wiadomość do wskazanej konwersacji i powiadamia o tym wszystkich `MessagesListener`-ów.
-     - _**C**reate conversation_: jeżli klient utworzy konwersację, `ThreadBehavior` dodaje ją do globalnego stanu przechowującego konwersacje i powiadamia wszystkich podłączonych klientów
-     - _**D**elete conversation_: usuwa wskazaną konwersację i powiadamia o tym
+    + rejestruje `ConversationsListener`, który zostanie powiadomiony przy każdej zmainie w liście konwersacji (dodanie/usunięcie)
+    + nasłuchuje w pętli na komunikaty przychodzące na socket używając funckji `read()` a następnie wykonuje odpowiednie akcje:
+        - _**S**ubscribe_: wyszukuje żądaną konwersację i tworzy dla niej `MessagesListener` – klasę która zostaje powiadomiona przy publikacji wiadomości
+        - _**U**nsubscribe_: usuwa `MessagesListener` dla podanej konwersacji
+        - _**P**ost message_: dodaje wiadomość do wskazanej konwersacji i powiadamia o tym wszystkich `MessagesListener`-ów.
+        - _**C**reate conversation_: jeżli klient utworzy konwersację, `ThreadBehavior` dodaje ją do globalnego stanu przechowującego konwersacje i powiadamia wszystkich podłączonych klientów
+        - _**D**elete conversation_: usuwa wskazaną konwersację i powiadamia o tym
 4. Po zakończeniu połączenia `ThreadBehavior` usuwa wszystkie stworzone przez siebie konwersacje i `Listener`-y oraz zamyka gniazdo połączenia
-   + stworzone konwersacje są pamiętane w `createdConversations: vector<Conversation *>`
-   + zarejestrowane `Listener`-y są pamiętane w `createdListeners: map<int, MessagesListener *>` oraz w `conversationsListener: ConversationsListener*`
-  
-#### Klient
-> klient oparty na Electron (NodeJS + Chromium) oraz Typescript
+    + stworzone konwersacje są pamiętane w `createdConversations: vector<Conversation *>`
+    + zarejestrowane `Listener`-y są pamiętane w `createdListeners: map<int, MessagesListener *>` oraz w `conversationsListener: ConversationsListener*`
+
+</details>
+
+<details>
+<summary>Klient [ElectronJS]</summary>
 
 1. `src/main.ts` uruchomiony zostaje w głównym procesie Electrona.
 2. `src/renderer/renderer.js` zostaje uruchomiony w osobnym procesami odpowiedzialnym za wyrenderowanie strony w html stanowiącej interfejs graficzny
@@ -78,6 +82,8 @@ który następnie zostaje obsłużony przez klasę `TcpMiddleware`
    1. `TcpMiddleware` używa dekoratora `@reEmmit('event')` który powoduje przesłanie do renderera eventu o nazwie
    `'event'` i danymi takimi jakie zwraca metoda – ułatwia to przekazanie rendererowi odpowiednio przetworzone dane
    2. Stan konwersacji jest przechowywany w klasie `Store` (src/main/Store.ts), tam zapisywana jest lista konwersacji przekazana przez serwer i stamtąd jest odczytywana
+</details>
+
 
 ### Sposób kompilacji i uruchomienia programu
 
