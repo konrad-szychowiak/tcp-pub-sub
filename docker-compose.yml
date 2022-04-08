@@ -2,7 +2,7 @@ version: "3"
 
 services:
   sk2server:
-    container_name: "sk2-tcp-server"
+    container_name: "teeceep-ps--server"
 
     build:
       context: server/
@@ -10,9 +10,3 @@ services:
 
     ports:
       - "1234:8080"
-
-  sk2client:
-    container_name: "sk2-tcp-client"
-    build:
-      context: client/
-      dockerfile: Dockerfile
